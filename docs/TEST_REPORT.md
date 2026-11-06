@@ -1,5 +1,19 @@
 # Relatório de testes
 
+## Contas essenciais e materiais — 06/11/2026
+
+| Comando | Resultado |
+|---|---|
+| `npm run typecheck` e `npm run lint` | Código de saída 0, sem avisos |
+| `npm run test` | **6 arquivos, 56 testes, 56 aprovados** (contas: 71.740 a 183.000 kWh e 625 a 2.450 m³ por mês, R$ 76 mil a R$ 336 mil por mês; OPEX R$ 7,9 mi a R$ 23 mi sem linha repetida; materiais R$ 6,1 mi a R$ 15 mi, menores que o CAPEX mínimo) |
+| `npm run e2e` | **11 testes, 11 aprovados**, incluindo axe na visão Materiais |
+| `npm run build` | Código de saída 0, sem avisos |
+| Capturas `docs/capturas/d9-contas-essenciais.png` e `d9-materiais.png` | Inspecionadas; console sem erros. Salários abaixo de R$ 10 mil passaram a aparecer por extenso (antes "R$ 2 mil a R$ 3 mil") |
+| `node docs/estimativas/gerar.cjs` + `validate.py` + PDF | Anexo com 16 páginas, validação aprovada, páginas conferidas |
+| `npm run dist:desktop` + app Linux em Xvfb (12 s) | Executáveis gerados com o texto novo no `app.asar`; app abriu sem travar |
+
+Site de prévia e slide "Investimento" republicados.
+
 ## Estimativas no app, no site e no desktop — 06/11/2026
 
 | Comando | Resultado |

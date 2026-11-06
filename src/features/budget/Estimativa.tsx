@@ -1,7 +1,23 @@
-import { ESTIMATIVA_CAPEX, ESTIMATIVA_EQUIPE, FINANCIAMENTO, DATA_BASE_ESTIMATIVA, ENCARGOS, type BaseEstimativa } from '../../data/estimates';
+import {
+  CONSUMO_AGUA_M3_MES,
+  CONSUMO_ENERGIA_KWH_MES,
+  DATA_BASE_ESTIMATIVA,
+  ENCARGOS,
+  ESTIMATIVA_CAPEX,
+  ESTIMATIVA_EQUIPE,
+  FINANCIAMENTO,
+  PRECOS_MATERIAIS,
+  TARIFA_AGUA_ESGOTO,
+  TARIFA_ENERGIA,
+  type BaseEstimativa,
+} from '../../data/estimates';
 import {
   capexTotal,
   comIndiretos,
+  consumiveis,
+  contasEssenciais,
+  linhasOpex,
+  materiaisObra,
   custoAnualFuncao,
   equipeResumo,
   faixaDe,
@@ -13,7 +29,6 @@ import {
   linhasDoObjeto,
   obraDireta,
   opexAnual,
-  opexOutros,
   porFase,
   porGrupo,
   type Faixa,
@@ -50,6 +65,11 @@ export function ResumoEstimativa() {
         <strong>Equipe própria</strong>
         <span className="valor-faixa">{formatarQtd(eq.pessoas)} pessoas</span>
         <span>Folha de {formatarFaixa(eq.folhaMensal)} por mês</span>
+      </div>
+      <div className="cartao">
+        <strong>Contas essenciais por mês</strong>
+        <span className="valor-faixa" data-testid="estimativa-contas"><FaixaTexto f={contasEssenciais().mensal} /></span>
+        <span>Luz, água e esgoto, gás, internet, telefone e coleta</span>
       </div>
     </div>
   );
@@ -162,17 +182,163 @@ export function EquipeOperacao() {
           concessionário.
         </p>
       </section>
+      <section aria-label="Contas essenciais">
+        <h3>Contas essenciais (luz, água, gás, internet)</h3>
+        <ContasEssenciais />
+      </section>
+      <section aria-label="Materiais de consumo">
+        <h3>Materiais de consumo por ano</h3>
+        <table className="tabela-custo">
+          <tbody>
+            {consumiveis().map((c) => (
+              <tr key={c.id}>
+                <td>
+                  <span className="item-titulo">{c.item}</span>
+                  {c.nota ? <span className="detalhe">{c.nota}</span> : null}
+                </td>
+                <td className="col-valor"><FaixaTexto f={c.faixa} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
       <section aria-label="Operação anual">
         <h3>Operação anual (OPEX)</h3>
         <table className="tabela-custo">
           <tbody>
-            <tr><td>OPX-PES-001 · Equipe própria com encargos e benefícios</td><td className="col-valor"><FaixaTexto f={eq.custoAnual} /></td></tr>
-            {opexOutros().map((o) => (
-              <tr key={o.id}><td>{o.id} · {o.item}{o.nota ? <span className="nota"> — {o.nota}</span> : null}</td><td className="col-valor"><FaixaTexto f={o.faixa} /></td></tr>
+            {linhasOpex().map((o) => (
+              <tr key={o.id}>
+                <td>
+                  <span className="item-titulo">{o.id} · {o.item}</span>
+                  {o.nota ? <span className="detalhe">{o.nota}</span> : null}
+                </td>
+                <td className="col-valor" data-testid={`opex-${o.id}`}><FaixaTexto f={o.faixa} /></td>
+              </tr>
             ))}
             <tr className="linha-total"><td>Operação por ano</td><td className="col-valor"><FaixaTexto f={opexAnual()} /></td></tr>
           </tbody>
         </table>
+      </section>
+    </>
+  );
+}
+
+const NUM = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
+
+/** Consumo × tarifa, por mês e por ano. */
+export function ContasEssenciais() {
+  const c = contasEssenciais();
+  return (
+    <>
+      <table className="tabela-custo">
+        <thead>
+          <tr><th scope="col">Conta</th><th scope="col">Por mês</th><th scope="col">Por ano</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span className="item-titulo">Energia elétrica</span>
+              <span className="detalhe">{formatarQtd(c.kwh)} kWh por mês × R$ {NUM.format(TARIFA_ENERGIA[0])} a R$ {NUM.format(TARIFA_ENERGIA[1])}/kWh</span>
+            </td>
+            <td className="col-valor" data-testid="conta-energia"><FaixaTexto f={c.energiaMes} /></td>
+            <td className="col-valor"><FaixaTexto f={[c.energiaMes[0] * 12, c.energiaMes[1] * 12]} /></td>
+          </tr>
+          <tr>
+            <td>
+              <span className="item-titulo">Água e esgoto</span>
+              <span className="detalhe">{formatarQtd(c.m3)} m³ por mês × R$ {NUM.format(TARIFA_AGUA_ESGOTO[0])} a R$ {NUM.format(TARIFA_AGUA_ESGOTO[1])}/m³</span>
+            </td>
+            <td className="col-valor" data-testid="conta-agua"><FaixaTexto f={c.aguaMes} /></td>
+            <td className="col-valor"><FaixaTexto f={[c.aguaMes[0] * 12, c.aguaMes[1] * 12]} /></td>
+          </tr>
+          {c.fixas.map((f) => (
+            <tr key={f.id}>
+              <td>
+                <span className="item-titulo">{f.item}</span>
+                {f.nota ? <span className="detalhe">{f.nota}</span> : null}
+              </td>
+              <td className="col-valor">{f.mmin === 0 ? <>até <FaixaTexto f={[f.mmax, f.mmax]} /></> : <FaixaTexto f={f.mes} />}</td>
+              <td className="col-valor">{f.mmin === 0 ? <>até <FaixaTexto f={[f.mmax * 12, f.mmax * 12]} /></> : <FaixaTexto f={[f.mes[0] * 12, f.mes[1] * 12]} />}</td>
+            </tr>
+          ))}
+          <tr className="linha-total">
+            <td>Total</td>
+            <td className="col-valor"><FaixaTexto f={c.mensal} /></td>
+            <td className="col-valor"><FaixaTexto f={c.anual} /></td>
+          </tr>
+        </tbody>
+      </table>
+      <details>
+        <summary>De onde vem o consumo</summary>
+        <ul className="nota">
+          {CONSUMO_ENERGIA_KWH_MES.map((x) => <li key={x.id}>{x.item}: {formatarQtd([x.cmin, x.cmax])} kWh/mês{x.nota ? ` (${x.nota})` : ''}</li>)}
+          {CONSUMO_AGUA_M3_MES.map((x) => <li key={x.id}>{x.item}: {formatarQtd([x.cmin, x.cmax])} m³/mês{x.nota ? ` (${x.nota})` : ''}</li>)}
+        </ul>
+      </details>
+      <p className="nota">
+        Tarifas: energia a partir de fatura comercial da Enel SP de abr/2026 (≈ R$ 0,93/kWh com tributos, antes do reajuste de 10,18%); água e esgoto pela
+        tabela da Sabesp para categoria pública acima de 50 m³ com o reajuste de 2026. Energia solar, água de chuva e reúso podem reduzir essas contas.
+      </p>
+    </>
+  );
+}
+
+/** Preços de referência de materiais e a parte de materiais dentro da obra. */
+export function Materiais() {
+  const ms = materiaisObra();
+  const total: Faixa = [ms.reduce((a, m) => a + m.faixa[0], 0), ms.reduce((a, m) => a + m.faixa[1], 0)];
+  return (
+    <>
+      <section aria-label="Preços de materiais">
+        <h3>Preços de referência (2026)</h3>
+        <div className="tabela-rolagem" tabIndex={0} role="region" aria-label="Tabela: preços de materiais">
+          <table className="tabela-custo">
+            <thead>
+              <tr><th scope="col">Material</th><th scope="col">Preço</th></tr>
+            </thead>
+            <tbody>
+              {PRECOS_MATERIAIS.map((m) => (
+                <tr key={m.material}>
+                  <td>
+                    <span className="item-titulo">{m.material}</span>
+                    <span className="detalhe">por {m.unidade} · {m.fonte}</span>
+                  </td>
+                  <td className="col-valor">{m.preco}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section aria-label="Materiais da obra">
+        <h3>Principais materiais da obra</h3>
+        <div className="tabela-rolagem" tabIndex={0} role="region" aria-label="Tabela: materiais da obra">
+          <table className="tabela-custo">
+            <thead>
+              <tr><th scope="col">Material</th><th scope="col">Custo</th></tr>
+            </thead>
+            <tbody>
+              {ms.map((m) => (
+                <tr key={m.id}>
+                  <td>
+                    <span className="item-titulo">{m.material}</span>
+                    <span className="detalhe">{formatarQtd([m.qmin, m.qmax])} {m.unidade} × {m.pmin === m.pmax ? `R$ ${NUM.format(m.pmin)}` : `R$ ${NUM.format(m.pmin)} a R$ ${NUM.format(m.pmax)}`}</span>
+                    <span className="detalhe">{m.nota}</span>
+                  </td>
+                  <td className="col-valor" data-testid={`mat-${m.id}`}><FaixaTexto f={m.faixa} /></td>
+                </tr>
+              ))}
+              <tr className="linha-total">
+                <td>Total destes materiais</td>
+                <td className="col-valor" data-testid="mat-total"><FaixaTexto f={total} /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="nota">
+          Estes materiais já estão dentro do custo de implantação (não se somam a ele). Quantidades por índices típicos de consumo, hipótese do estudo;
+          concreto e aço dependem do projeto estrutural. Preços de varejo e de tabelas de referência: obra grande negocia com fornecedor.
+        </p>
       </section>
     </>
   );

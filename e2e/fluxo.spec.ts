@@ -70,7 +70,7 @@ test.describe('fluxo principal da maquete', () => {
 import AxeBuilder from '@axe-core/playwright';
 
 test.describe('acessibilidade automática (axe)', () => {
-  for (const [aba, vista] of [['Explorar'], ['Orçamento'], ['Orçamento', 'Estimativa por item'], ['Orçamento', 'Equipe e operação'], ['Orçamento', 'Financiamento'], ['Programas'], ['Apresentar']] as [string, string?][]) {
+  for (const [aba, vista] of [['Explorar'], ['Orçamento'], ['Orçamento', 'Estimativa por item'], ['Orçamento', 'Equipe e operação'], ['Orçamento', 'Materiais'], ['Orçamento', 'Financiamento'], ['Programas'], ['Apresentar']] as [string, string?][]) {
     test(`sem violações sérias na aba ${aba}${vista ? ` (${vista})` : ''}`, async ({ page }) => {
       await page.goto('/');
       await expect(page.locator('canvas')).toBeVisible({ timeout: 20_000 });

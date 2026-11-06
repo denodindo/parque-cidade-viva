@@ -130,11 +130,129 @@ export interface OutroOpex {
 }
 
 export const ESTIMATIVA_OPEX_OUTROS: readonly OutroOpex[] = [
-  { id: 'OPX-UTL-001', item: 'Água, energia, gás e internet', min: 1_200_000, max: 3_000_000, nota: 'Piscinas aquecidas são o maior consumo.' },
   { id: 'OPX-PIS-001', item: 'Produtos e insumos das piscinas', min: 150_000, max: 400_000 },
   { id: 'OPX-MAN-001', item: 'Materiais de manutenção, reposição e contratos técnicos', min: 0.01, max: 0.02, percentual_da_obra: true, nota: '1% a 2% ao ano do custo de obra.' },
   { id: 'OPX-PRG-001', item: 'Programação: materiais, eventos, transporte e oficineiros', min: 800_000, max: 2_500_000 },
   { id: 'OPX-GER-001', item: 'Seguros, sistemas, auditoria e comunicação', min: 200_000, max: 600_000 },
+];
+
+/* ---------- Contas essenciais (OPX-UTL-001): consumo × tarifa ---------- */
+
+export interface Consumo {
+  id: string;
+  item: string;
+  /** Consumo mensal mínimo e máximo (kWh ou m³). */
+  cmin: number;
+  cmax: number;
+  nota?: string;
+}
+
+export const CONSUMO_ENERGIA_KWH_MES: readonly Consumo[] = [
+  { id: 'ENE-ILU', item: 'Iluminação externa (150 a 250 postes LED, 12 h por noite)', cmin: 3240, cmax: 9000, nota: '60 a 100 W por poste.' },
+  { id: 'ENE-GIN', item: 'Ginásio: iluminação, ventilação e equipamentos', cmin: 22500, cmax: 63000, nota: '2,5 a 5 kWh por m² por mês.' },
+  { id: 'ENE-AQC', item: 'Aquecimento das piscinas (bomba de calor)', cmin: 9000, cmax: 18000, nota: 'Piscina coberta; com gás o custo muda.' },
+  { id: 'ENE-FIL', item: 'Bombas e filtragem das piscinas', cmin: 8000, cmax: 16000 },
+  { id: 'ENE-CUL', item: 'Centro cultural com climatização (auditório, biblioteca, salas)', cmin: 27000, cmax: 72000, nota: '6 a 12 kWh por m² por mês.' },
+  { id: 'ENE-APO', item: 'Apoio, sanitários, quiosques e áreas comuns', cmin: 2000, cmax: 5000 },
+];
+
+export const CONSUMO_AGUA_M3_MES: readonly Consumo[] = [
+  { id: 'AGU-PIS', item: 'Reposição das piscinas (evaporação e retrolavagem)', cmin: 150, cmax: 300, nota: 'Cerca de 1% a 2% de ~520 m³ por dia.' },
+  { id: 'AGU-SAN', item: 'Sanitários, vestiários e duchas', cmin: 225, cmax: 1200, nota: '1.500 a 4.000 visitas por dia, 5 a 10 L cada.' },
+  { id: 'AGU-IRR', item: 'Irrigação de jardins e gramados', cmin: 200, cmax: 800, nota: 'Cai muito com água de chuva ou de reúso.' },
+  { id: 'AGU-LIM', item: 'Limpeza, horta e bebedouros', cmin: 50, cmax: 150 },
+];
+
+/** R$/kWh com tributos: fatura B3 comercial Enel SP abr/2026 ≈ R$ 0,93 antes do reajuste de 10,18%; grupo A (média tensão) tende a ser menor. */
+export const TARIFA_ENERGIA = [0.7, 1.05] as const;
+/** R$/m³ de água + esgoto: tabela Sabesp categoria pública > 50 m³ (R$ 22,44 + R$ 22,44 em 2025) com reajuste de 2026. */
+export const TARIFA_AGUA_ESGOTO = [30, 48] as const;
+
+export interface ContaFixa {
+  id: string;
+  item: string;
+  /** Valor mensal mínimo e máximo, R$. */
+  mmin: number;
+  mmax: number;
+  nota?: string;
+}
+
+export const CONTAS_FIXAS_MES: readonly ContaFixa[] = [
+  { id: 'GAS', item: 'Gás (reserva do aquecimento)', mmin: 0, mmax: 5000, nota: 'A cozinha do restaurante é do concessionário.' },
+  { id: 'NET', item: 'Internet: 2 links dedicados e Wi-Fi público', mmin: 3000, mmax: 8000 },
+  { id: 'TEL', item: 'Telefonia', mmin: 500, mmax: 1500 },
+  { id: 'RES', item: 'Coleta de resíduos (contrato de grande gerador)', mmin: 4000, mmax: 12000, nota: 'Recicláveis podem ir para cooperativa parceira.' },
+];
+
+/* ---------- Materiais de consumo da operação (por ano) ---------- */
+
+export interface Consumivel {
+  id: string;
+  item: string;
+  min: number;
+  max: number;
+  /** Valor por pessoa da equipe por ano (multiplica pela equipe). */
+  por_pessoa?: boolean;
+  nota?: string;
+}
+
+export const CONSUMIVEIS_ANO: readonly Consumivel[] = [
+  { id: 'CON-LIM', item: 'Limpeza e higiene (papel, sabonete, sacos, produtos)', min: 96_000, max: 240_000 },
+  { id: 'CON-ESP', item: 'Material esportivo (bolas, redes, coletes, colchonetes)', min: 40_000, max: 120_000 },
+  { id: 'CON-JAR', item: 'Jardinagem e horta (adubo, mudas de reposição, combustível)', min: 40_000, max: 120_000 },
+  { id: 'CON-UNI', item: 'Uniformes e equipamentos de proteção', min: 400, max: 800, por_pessoa: true, nota: 'R$ 400 a R$ 800 por pessoa por ano.' },
+  { id: 'CON-ESC', item: 'Escritório, impressão e expediente', min: 20_000, max: 60_000 },
+  { id: 'CON-SEG', item: 'Extintores, AVCB, dedetização e análises de água', min: 25_000, max: 70_000 },
+];
+
+/* ---------- Materiais de obra: preços de referência e quantidades ---------- */
+
+export interface PrecoMaterial {
+  material: string;
+  unidade: string;
+  preco: string;
+  fonte: string;
+}
+
+export const PRECOS_MATERIAIS: readonly PrecoMaterial[] = [
+  { material: 'Cimento CP II', unidade: 'saco de 50 kg', preco: 'R$ 38,00', fonte: 'Lar Pontual, varejo SP, out/2026' },
+  { material: 'Vergalhão de aço CA-50 (8 mm)', unidade: 'kg', preco: 'R$ 9,07', fonte: 'Lar Pontual, out/2026 (R$ 43 a barra de 12 m)' },
+  { material: 'Armação de aço pronta (corte, dobra e montagem)', unidade: 'kg', preco: 'R$ 16,24', fonte: 'Lar Pontual, SP, out/2026, sem BDI' },
+  { material: 'Concreto usinado', unidade: 'm³', preco: 'R$ 330 a R$ 680 (fck 25 ≈ R$ 425)', fonte: 'Lar Pontual, 2026' },
+  { material: 'Areia média', unidade: 'm³', preco: 'R$ 135,00', fonte: 'Lar Pontual, granel, out/2026' },
+  { material: 'Brita 1', unidade: 'm³', preco: 'R$ 160,00', fonte: 'Lar Pontual, granel, out/2026' },
+  { material: 'Bloco intertravado de concreto (6 cm)', unidade: 'm²', preco: 'R$ 79,14 a R$ 100,31', fonte: 'SINAPI mai/2026 (insumo), via Orçamentor' },
+  { material: 'Tinta acrílica', unidade: 'lata de 18 L', preco: 'R$ 280,00', fonte: 'Lar Pontual, out/2026; rende até 117 m² por demão' },
+  { material: 'Grama esmeralda em placas', unidade: 'm²', preco: 'R$ 18,00 (plantio: R$ 23,19)', fonte: 'SINAPI mai/2026, via Orçamentor' },
+  { material: 'Muda de árvore ornamental de 2 m', unidade: 'unidade', preco: 'R$ 83,60 a R$ 115,31', fonte: 'SICRO abr/2026 e SINAPI mai/2026' },
+  { material: 'Grama sintética instalada', unidade: 'm²', preco: 'R$ 90 a R$ 180', fonte: 'Guia de mercado, 2026' },
+  { material: 'Playground completo (equipamentos)', unidade: 'conjunto', preco: 'R$ 51 mil a R$ 61 mil', fonte: 'Licitações municipais, 2026' },
+];
+
+export interface MaterialObra {
+  id: string;
+  material: string;
+  qmin: number;
+  qmax: number;
+  unidade: string;
+  pmin: number;
+  pmax: number;
+  nota: string;
+}
+
+/**
+ * Quantidades por índices típicos de consumo (hipótese do estudo). É a PARTE
+ * de materiais que já está dentro do custo de implantação: não se soma a ele.
+ */
+export const MATERIAIS_OBRA: readonly MaterialObra[] = [
+  { id: 'MAT-CON', material: 'Concreto estrutural dos edifícios', qmin: 3734, qmax: 7013, unidade: 'm³', pmin: 425, pmax: 550, nota: '0,25 a 0,35 m³ por m² construído (14.936 a 20.036 m²).' },
+  { id: 'MAT-ACO', material: 'Aço CA-50 das estruturas', qmin: 298_700, qmax: 771_400, unidade: 'kg', pmin: 9, pmax: 11, nota: '80 a 110 kg por m³ de concreto; só material.' },
+  { id: 'MAT-PAV', material: 'Blocos intertravados (caminhos, estacionamento e praça)', qmin: 13720, qmax: 13720, unidade: 'm²', pmin: 79.14, pmax: 100.31, nota: '12.000 + 2.200 + 1.520 m².' },
+  { id: 'MAT-ARE', material: 'Areia de assentamento dos pisos', qmin: 686, qmax: 686, unidade: 'm³', pmin: 135, pmax: 135, nota: 'Camada de 5 cm.' },
+  { id: 'MAT-GRA', material: 'Grama esmeralda', qmin: 12000, qmax: 18000, unidade: 'm²', pmin: 18, pmax: 18, nota: '40% a 60% do bosque e jardins.' },
+  { id: 'MAT-MUD', material: 'Mudas de árvores', qmin: 300, qmax: 600, unidade: 'unidades', pmin: 83.6, pmax: 115.31, nota: 'A maquete mostra cerca de 300 árvores.' },
+  { id: 'MAT-SIN', material: 'Grama sintética do campo society', qmin: 2016, qmax: 2016, unidade: 'm²', pmin: 90, pmax: 180, nota: 'Já instalada.' },
+  { id: 'MAT-TIN', material: 'Tinta acrílica (2 demãos)', qmin: 638, qmax: 1199, unidade: 'latas de 18 L', pmin: 280, pmax: 345, nota: '2,5 a 3,5 m² de parede por m² construído.' },
 ];
 
 export interface FonteFinanciamento {

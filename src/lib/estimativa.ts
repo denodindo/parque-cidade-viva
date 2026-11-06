@@ -1,5 +1,12 @@
 import {
   BENEFICIOS_MES,
+  CONSUMIVEIS_ANO,
+  CONSUMO_AGUA_M3_MES,
+  CONSUMO_ENERGIA_KWH_MES,
+  CONTAS_FIXAS_MES,
+  MATERIAIS_OBRA,
+  TARIFA_AGUA_ESGOTO,
+  TARIFA_ENERGIA,
   ENCARGOS,
   ESTIMATIVA_CAPEX,
   ESTIMATIVA_EQUIPE,
@@ -85,8 +92,38 @@ export function opexOutros() {
   }));
 }
 
+/** Contas essenciais: consumo mensal × tarifa, e contas fixas. Valores anuais e mensais. */
+export function contasEssenciais() {
+  const kwh = soma(CONSUMO_ENERGIA_KWH_MES.map((c) => [c.cmin, c.cmax] as Faixa));
+  const m3 = soma(CONSUMO_AGUA_M3_MES.map((c) => [c.cmin, c.cmax] as Faixa));
+  const energiaMes: Faixa = [kwh[0] * TARIFA_ENERGIA[0], kwh[1] * TARIFA_ENERGIA[1]];
+  const aguaMes: Faixa = [m3[0] * TARIFA_AGUA_ESGOTO[0], m3[1] * TARIFA_AGUA_ESGOTO[1]];
+  const fixas = CONTAS_FIXAS_MES.map((c) => ({ ...c, mes: [c.mmin, c.mmax] as Faixa }));
+  const mensal = soma([energiaMes, aguaMes, ...fixas.map((c) => c.mes)]);
+  return { kwh, m3, energiaMes, aguaMes, fixas, mensal, anual: [mensal[0] * 12, mensal[1] * 12] as Faixa };
+}
+
+export function consumiveis() {
+  const pessoas = equipeResumo().pessoas;
+  return CONSUMIVEIS_ANO.map((c) => ({ ...c, faixa: (c.por_pessoa ? [c.min * pessoas[0], c.max * pessoas[1]] : [c.min, c.max]) as Faixa }));
+}
+
+export function materiaisObra() {
+  return MATERIAIS_OBRA.map((m) => ({ ...m, faixa: [m.qmin * m.pmin, m.qmax * m.pmax] as Faixa }));
+}
+
+/** Linhas do OPEX anual, cada uma contada uma vez. */
+export function linhasOpex(): { id: string; item: string; faixa: Faixa; nota?: string }[] {
+  return [
+    { id: 'OPX-PES-001', item: 'Equipe própria com encargos e benefícios', faixa: equipeResumo().custoAnual },
+    { id: 'OPX-UTL-001', item: 'Contas essenciais: luz, água e esgoto, gás, internet, telefone e coleta de resíduos', faixa: contasEssenciais().anual },
+    { id: 'OPX-CON-001', item: 'Materiais de consumo (limpeza, esporte, jardinagem, uniformes, escritório, segurança)', faixa: soma(consumiveis().map((c) => c.faixa)) },
+    ...opexOutros().map((o) => ({ id: o.id, item: o.item, faixa: o.faixa, nota: o.nota })),
+  ];
+}
+
 export function opexAnual(): Faixa {
-  return soma([equipeResumo().custoAnual, ...opexOutros().map((o) => o.faixa)]);
+  return soma(linhasOpex().map((l) => l.faixa));
 }
 
 export function implantacaoProgramas(): Faixa {
@@ -100,11 +137,11 @@ export function linhasDoObjeto(id: string): LinhaEstimativa[] {
 const NUM1 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const NUM0 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
 
-/** "R$ 31 mi", "R$ 2,5 mi", "R$ 480 mil". Nunca recebe ausência: estimativa sempre tem faixa. */
+/** "R$ 31 mi", "R$ 2,5 mi", "R$ 480 mil", "R$ 2.100". Nunca recebe ausência: estimativa sempre tem faixa. */
 export function brlCurto(v: number): string {
   if (v >= 10_000_000) return `R$ ${NUM0.format(v / 1e6)} mi`;
   if (v >= 1_000_000) return `R$ ${NUM1.format(v / 1e6)} mi`;
-  if (v >= 1000) return `R$ ${NUM0.format(v / 1000)} mil`;
+  if (v >= 10_000) return `R$ ${NUM0.format(v / 1000)} mil`;
   return `R$ ${NUM0.format(v)}`;
 }
 

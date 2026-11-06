@@ -1,5 +1,5 @@
 import { EDIFICIOS } from '../data/buildings';
-import { ESTIMATIVA_CAPEX, ESTIMATIVA_EQUIPE, FINANCIAMENTO } from '../data/estimates';
+import { CONSUMIVEIS_ANO, CONSUMO_AGUA_M3_MES, CONSUMO_ENERGIA_KWH_MES, CONTAS_FIXAS_MES, ESTIMATIVA_CAPEX, ESTIMATIVA_EQUIPE, FINANCIAMENTO, MATERIAIS_OBRA, PRECOS_MATERIAIS } from '../data/estimates';
 import { ORCAMENTO } from '../data/budget';
 import { INSTALACOES, pegadas } from '../data/facilities';
 import { CAMINHOS, GEOMETRIA_SETORES } from '../data/layout';
@@ -100,6 +100,10 @@ export function validarDados(): string[] {
     if (!(l.qmin > 0 && l.umin > 0 && l.qmin <= l.qmax && l.umin <= l.umax)) erros.push(`Estimativa ${l.id}: faixa inválida`);
   }
   for (const f of ESTIMATIVA_EQUIPE) if (!(f.qmin > 0 && f.smin > 0 && f.qmin <= f.qmax && f.smin <= f.smax)) erros.push(`Equipe ${f.funcao}: faixa inválida`);
+  for (const c of [...CONSUMO_ENERGIA_KWH_MES, ...CONSUMO_AGUA_M3_MES]) if (!(c.cmin > 0 && c.cmin <= c.cmax)) erros.push(`Consumo ${c.id}: faixa inválida`);
+  for (const c of CONTAS_FIXAS_MES) if (!(c.mmin >= 0 && c.mmax > 0 && c.mmin <= c.mmax)) erros.push(`Conta ${c.id}: faixa inválida`);
+  for (const c of CONSUMIVEIS_ANO) if (!(c.min > 0 && c.min <= c.max)) erros.push(`Consumível ${c.id}: faixa inválida`);
+  for (const m of MATERIAIS_OBRA) if (!(m.qmin > 0 && m.pmin > 0 && m.qmin <= m.qmax && m.pmin <= m.pmax)) erros.push(`Material ${m.id}: faixa inválida`);
   return erros;
 }
 
@@ -184,6 +188,6 @@ export const FRASES_PROIBIDAS: readonly RegExp[] = [
 ];
 
 export function auditarTextos(): string[] {
-  const texto = JSON.stringify([SETORES, NUCLEOS, EDIFICIOS, INSTALACOES, ORCAMENTO, PROGRAMAS, OPORTUNIDADES, PASSOS, ESTIMATIVA_CAPEX, ESTIMATIVA_EQUIPE, FINANCIAMENTO]);
+  const texto = JSON.stringify([SETORES, NUCLEOS, EDIFICIOS, INSTALACOES, ORCAMENTO, PROGRAMAS, OPORTUNIDADES, PASSOS, ESTIMATIVA_CAPEX, ESTIMATIVA_EQUIPE, FINANCIAMENTO, CONSUMO_ENERGIA_KWH_MES, CONSUMO_AGUA_M3_MES, CONTAS_FIXAS_MES, CONSUMIVEIS_ANO, PRECOS_MATERIAIS, MATERIAIS_OBRA]);
   return FRASES_PROIBIDAS.filter((r) => r.test(texto)).map((r) => `Texto proibido encontrado: ${r}`);
 }

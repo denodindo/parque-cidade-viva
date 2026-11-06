@@ -90,6 +90,7 @@ function destaque(pares) {
   });
 }
 
+const nf = (v) => v.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 const fmtQ = (a, b) => (a === b ? a.toLocaleString('pt-BR') : `${a.toLocaleString('pt-BR')} a ${b.toLocaleString('pt-BR')}`);
 const fmtU = (a, b, un) => (un === 'conjunto' ? '—' : `${faixa(a, b)}/${un === 'postes' ? 'poste' : un}`);
 const BASE = { R: 'Referência pública', H: 'Hipótese do estudo' };
@@ -130,6 +131,17 @@ for (const g of Object.keys(R.grupos)) {
 
 // ---------- fontes ----------
 const FONTES = [
+  ['Câmara dos Deputados: fatura comercial B3 da Enel SP, abril de 2026', 'https://www.camara.leg.br/cota-parlamentar/documentos/publ/3072/2026/8089019.pdf'],
+  ['InfoMoney: Aneel aprova alta média de 10,18% na Enel SP (2026)', 'https://www.infomoney.com.br/?p=3394051'],
+  ['Semil-SP: anexo tarifário Sabesp, categoria pública acima de 50 m³', 'https://semil.sp.gov.br/urae1/wp-content/uploads/sites/26/2025/02/ANEXO-IV_Apostilado.pdf'],
+  ['ABC do ABC: Sabesp confirma reajuste de 6,11% em 2026', 'https://abcdoabc.com.br/sabesp-aumento-6-11-conta-de-agua-2026/'],
+  ['Lar Pontual: cimento CP II', 'https://larpontual.com.br/portal/ferramentas/base-larpontual/materiais/cimento-cp-ii'],
+  ['Lar Pontual: vergalhão CA-50 8 mm', 'https://larpontual.com.br/portal/ferramentas/base-larpontual/materiais/vergalhao-ca-50-8-mm'],
+  ['Lar Pontual: concreto usinado fck 25', 'https://larpontual.com.br/portal/ferramentas/base-larpontual/materiais/concreto-usinado-fck-25'],
+  ['Lar Pontual: tinta acrílica', 'https://larpontual.com.br/portal/ferramentas/base-larpontual/materiais/tinta-acrilica'],
+  ['Orçamentor: bloco intertravado (SINAPI)', 'https://orcamentor.com/insumo/695/'],
+  ['Orçamentor: grama esmeralda em placas (SINAPI)', 'https://orcamentor.com/insumo/3322/'],
+  ['Orçamentor: muda de árvore ornamental de 2 m (SINAPI)', 'https://orcamentor.com/insumo/359/'],
   ['SindusCon-SP: CUB do Estado de São Paulo, setembro de 2026 (via Portal Dori)', 'https://portaldori.com.br/2026/10/05/sinduscon-divulga-tabelas-de-custo-unitario-basico-no-estado-de-sao-paulo-referencia-setembro-de-2026/'],
   ['Agência Gov: seleção de 260 Espaços Esportivos Comunitários, até R$ 1,5 mi cada (2025)', 'https://agenciagov.ebc.com.br/noticias/202502/ministerio-do-esporte-abre-selecao-para-construcao-de-260-centros-esportivos-comunitarios'],
   ['Casa Civil: manual Novo PAC Seleções 2025, Espaços Esportivos Comunitários', 'https://www.gov.br/casacivil/pt-br/novopac/selecoes2025/arquivos/manual-2025-espacos-esportivos-comunitarios.pdf/@@download/file'],
@@ -189,6 +201,9 @@ const conteudo = [
     ['Implantação de programas (acervo, kits, sistemas)', faixa(R.imp[2], R.imp[3]), 'Conta separada da obra'],
     ['Operação por ano (OPEX)', faixa(...R.opexAno), 'Equipe, contas, manutenção e programação'],
     ['   Equipe própria por ano, com encargos e benefícios', faixa(...R.pessoalAno), `${R.pessoas[0]} a ${R.pessoas[1]} pessoas`],
+    ['   Contas essenciais por mês (luz, água, gás, internet, coleta)', faixa(...R.contas.mensal), `${faixa(...R.contas.anual)} por ano`],
+    ['   Materiais de consumo por ano', faixa(...R.consAno), 'Limpeza, esporte, jardinagem, uniformes'],
+    ['Principais materiais da obra', faixa(...R.matTotal), 'Parte do CAPEX, não soma'],
   ], [4.5, 2.4, 3.6], { direita: [1] }),
   espaco(),
   p('A faixa é larga de propósito: sem topografia, sondagem e projeto, o custo real pode ficar em qualquer ponto dela. O peso maior está nos dois edifícios, que respondem por cerca de três quartos do total. Por isso a implantação em fases permite abrir o parque essencial com uma fração do investimento e construir o centro integrado quando houver recursos para obra e para operação.'),
@@ -253,8 +268,29 @@ const conteudo = [
 
   // ---------- 6 ----------
   h1('6. Operação anual (OPEX)'),
+  h2('6.1 Contas essenciais: luz, água, gás, internet e coleta'),
+  p('Consumo mensal estimado multiplicado pela tarifa de 2026. Energia: fatura comercial da Enel SP de abril de 2026 (cerca de R$ 0,93/kWh com tributos, antes do reajuste de 10,18% de julho); uma ligação em média tensão tende a sair mais barata. Água e esgoto: tabela da Sabesp para categoria pública acima de 50 m³, com o reajuste de 2026.'),
+  tabela(['Conta', 'Consumo e tarifa', 'Por mês', 'Por ano'], [
+    ['Energia elétrica', `${fmtQ(...R.contas.kwh)} kWh/mês × R$ ${nf(D.T_ENERGIA[0])} a R$ ${nf(D.T_ENERGIA[1])}/kWh`, faixa(...R.contas.energiaMes), faixa(R.contas.energiaMes[0] * 12, R.contas.energiaMes[1] * 12)],
+    ['Água e esgoto', `${fmtQ(...R.contas.m3)} m³/mês × R$ ${nf(D.T_AGUA[0])} a R$ ${nf(D.T_AGUA[1])}/m³`, faixa(...R.contas.aguaMes), faixa(R.contas.aguaMes[0] * 12, R.contas.aguaMes[1] * 12)],
+    ...D.contasFixas.map(([, item, a, b, nota]) => [item, nota || 'Valor mensal', a === 0 ? `até ${brl(b)}` : faixa(a, b), a === 0 ? `até ${brl(b * 12)}` : faixa(a * 12, b * 12)]),
+    { total: true, c: ['Total', '', faixa(...R.contas.mensal), faixa(...R.contas.anual)] },
+  ], [2.6, 4.0, 1.9, 1.9], { direita: [2, 3] }),
+  p([t('De onde vem o consumo', { bold: true, size: 18, color: CINZA })], { spacing: { before: 120, after: 40 } }),
+  ...D.energia.map(([, item, a, b, nota]) => bullet([t(`${item}: ${fmtQ(a, b)} kWh/mês${nota ? ` (${nota})` : ''}`, { size: 18 })])),
+  ...D.agua.map(([, item, a, b, nota]) => bullet([t(`${item}: ${fmtQ(a, b)} m³/mês${nota ? ` (${nota})` : ''}`, { size: 18 })])),
+  nota('Energia solar no telhado do ginásio, captação de chuva e reúso de água para irrigação e descargas podem reduzir essas contas; cada solução precisa de projeto e orçamento próprios.'),
+  h2('6.2 Materiais de consumo'),
+  tabela(['Item', 'Por ano'], [
+    ...R.cons.map((c) => [c.item, faixa(c.min, c.max)]),
+    { total: true, c: ['Total', faixa(...R.consAno)] },
+  ], [7, 2.5], { direita: [1] }),
+  espaco(),
+  h2('6.3 Total da operação'),
   tabela(['Item', 'Faixa por ano', 'Base', 'Observação'], [
     ['OPX-PES-001 · Equipe própria com encargos e benefícios', faixa(...R.pessoalAno), 'Seção 5', ''],
+    ['OPX-UTL-001 · Contas essenciais (luz, água, gás, internet, telefone, coleta)', faixa(...R.contas.anual), 'Seção 6.1', ''],
+    ['OPX-CON-001 · Materiais de consumo', faixa(...R.consAno), 'Seção 6.2', ''],
     ...R.outros.map((o) => [`${o.cod} · ${o.item}`, faixa(o.min, o.max), BASE[o.base], o.nota]),
     { total: true, c: ['Operação por ano', faixa(...R.opexAno), '', ''] },
   ], [4.0, 2.1, 1.7, 3.0], { direita: [1] }),
@@ -262,13 +298,25 @@ const conteudo = [
   caixa('Por que a operação importa tanto', [
     `Em cerca de 10 anos, o parque gasta em operação algo da mesma ordem do que custou para construir. Por isso nenhum edifício deve ser inaugurado sem o custeio anual garantido em orçamento público, contrato de gestão ou fundo próprio.`,
   ], 'E7F1E8', '1F4D33', '4F8F5F'),
-  quebra(),
 
-  // ---------- 7 ----------
-  h1('7. Quem pode financiar cada área'),
+  // ---------- 7 materiais ----------
+  new Paragraph({ pageBreakBefore: true, heading: HeadingLevel.HEADING_1, children: [t('7. Materiais de obra: preços e quantidades')] }),
+  h2('7.1 Preços de referência (2026)'),
+  tabela(['Material', 'Unidade', 'Preço', 'Fonte'], D.precos.map(([m, u, pr, f]) => [m, u, pr, f]), [3.4, 1.6, 2.4, 3.1]),
+  espaco(),
+  h2('7.2 Principais materiais da obra'),
+  p('Quantidades por índices típicos de consumo (hipótese do estudo). É a parte de materiais que já está dentro do custo de implantação da seção 3: não se soma a ele.'),
+  tabela(['Material', 'Quantidade', 'Preço unitário', 'Custo'], [
+    ...R.mats.map((m) => [`${m.material}${m.nota ? ` (${m.nota})` : ''}`, `${fmtQ(m.qmin, m.qmax)} ${m.un}`, m.pmin === m.pmax ? `R$ ${nf(m.pmin)}` : `R$ ${nf(m.pmin)} a R$ ${nf(m.pmax)}`, faixa(m.min, m.max)]),
+    { total: true, c: ['Total destes materiais', '', '', faixa(...R.matTotal)] },
+  ], [4.4, 2.0, 2.0, 2.1], { direita: [3] }),
+  nota('Concreto e aço dependem do projeto estrutural. Preços de varejo e de tabelas de referência; uma obra grande negocia direto com fornecedores.'),
+
+  // ---------- 8 ----------
+  h1('8. Quem pode financiar cada área'),
   p('O parque é um equipamento público. O caminho mais realista é a prefeitura (dona ou responsável pela área) ser a proponente das obras e combinar recursos federais, estaduais, municipais, de empresas por leis de incentivo e de crédito. Abaixo, as fontes possíveis por área, com os valores de referência encontrados. Nenhuma está garantida: todas dependem de edital, aprovação de projeto e formalização.'),
 
-  h2('7.1 Esporte: como a Secretaria do Esporte pode entrar'),
+  h2('8.1 Esporte: como a Secretaria do Esporte pode entrar'),
   p([t('O exemplo pedido. São três níveis de secretaria, cada um com um papel diferente:', {})]),
   tabela(['Quem', 'Como entra', 'Valor de referência'], [
     ['Ministério do Esporte (federal)', 'Novo PAC Seleções, Espaços Esportivos Comunitários: a prefeitura cadastra a proposta, o ministério seleciona e a Caixa repassa e fiscaliza. O projeto padrão tem campo society sintético, quadra, pista de caminhada e parque infantil.', 'Até R$ 1,5 mi por unidade (260 unidades na seleção de 2025)'],
@@ -285,7 +333,7 @@ const conteudo = [
   numero('Equipamentos e programas esportivos: projetos na Lei de Incentivo ao Esporte apresentados por uma entidade parceira, e editais da SEME.', 'passos'),
   numero('Operação: professores e guarda-vidas no orçamento anual da SEME, antes da inauguração.', 'passos'),
 
-  h2('7.2 Cultura e educação'),
+  h2('8.2 Cultura e educação'),
   tabela(['Quem', 'Como entra', 'Valor de referência'], [
     ['Ministério da Cultura', 'Novo PAC, CEU da Cultura: edifício modular com cineteatro, salas e equipamentos. Pode compor parte do centro cultural.', 'Média de R$ 2 mi por unidade (R$ 2 a R$ 2,5 mi em casos de 2025–2026)'],
     ['Lei Rouanet (federal)', 'Projeto cultural aprovado; empresas patrocinam com abatimento no Imposto de Renda. Serve para auditório, programação e acervo.', 'Empresas do Lucro Real: até 4% do IR devido. Pessoas físicas: até 6%'],
@@ -295,7 +343,7 @@ const conteudo = [
   ], [2.4, 5.0, 3.1]),
   espaco(),
 
-  h2('7.3 Inclusão social, infância e meio ambiente'),
+  h2('8.3 Inclusão social, infância e meio ambiente'),
   tabela(['Quem', 'Como entra', 'Valor de referência'], [
     ['FUMCAD (Fundo Municipal da Criança e do Adolescente)', 'Doações dedutíveis do Imposto de Renda para projetos aprovados pelo conselho municipal: playgrounds, programas de infância e juventude.', 'Empresas: até 1% do IR devido. Pessoas físicas: até 6%, somado a outros incentivos'],
     ['Fundo Municipal do Idoso', 'Doações dedutíveis para programas de longevidade.', 'Empresas: até 1% do IR devido'],
@@ -304,7 +352,7 @@ const conteudo = [
   ], [2.4, 5.0, 3.1]),
   espaco(),
 
-  h2('7.4 Infraestrutura, crédito e receitas próprias'),
+  h2('8.4 Infraestrutura, crédito e receitas próprias'),
   tabela(['Quem', 'Como entra', 'Valor de referência'], [
     ['Caixa: FINISA e FINISA Verde', 'Empréstimo ao município para despesas de capital (obra), com garantia no Fundo de Participação dos Municípios.', 'Ex.: R$ 12 mi contratados por Buenópolis-MG em 2026'],
     ['BNDES', 'Financiamento e apoio à estruturação de projetos municipais.', 'Até 100% do projeto, segundo o governo federal'],
@@ -313,7 +361,7 @@ const conteudo = [
   ], [2.4, 5.0, 3.1]),
   espaco(),
 
-  h2('7.5 Parceiros internacionais'),
+  h2('8.5 Parceiros internacionais'),
   tabela(['Quem', 'Como entra'], [
     ['BID, Banco Mundial e CAF', 'Empréstimos a municípios para programas urbanos maiores (vários parques ou um programa de bairro), com aval da União e análise federal. Processo longo; faz sentido se o parque fizer parte de um programa maior.'],
     ['ONU-Habitat', 'Cooperação técnica e metodologia de espaços públicos (Programa Global de Espaço Público).'],
@@ -322,7 +370,7 @@ const conteudo = [
   ], [3, 7.5]),
   espaco(),
 
-  h2('7.6 Empresas privadas'),
+  h2('8.6 Empresas privadas'),
   p('Empresas entram principalmente pelas leis de incentivo, porque o patrocínio sai do imposto que elas já pagariam. O perfil mais provável é de empresas do Lucro Real com operação na região (bancos, energia, saneamento, telecomunicações, varejo, construção, indústria). Para encontrá-las, as listas públicas de incentivadores da Lei Rouanet e da Lei de Incentivo ao Esporte mostram quem já patrocina projetos parecidos.'),
   caixa('Exemplo de conta (ilustrativo)', [
     'Uma empresa do Lucro Real com R$ 20 mi de Imposto de Renda devido no ano poderia destinar até R$ 400 mil pela Lei de Incentivo ao Esporte (2%), até R$ 800 mil pela Lei Rouanet (4%) e até R$ 200 mil ao FUMCAD (1%).',
@@ -331,7 +379,7 @@ const conteudo = [
   quebra(),
 
   // ---------- 8 ----------
-  h1('8. Composição possível das fontes'),
+  h1('9. Composição possível das fontes'),
   p('Cenário ilustrativo de como cada bloco poderia ser pago. Os valores de referência são tetos ou médias de programas, não recursos aprovados para o parque.'),
   tabela(['Bloco', 'Custo estimado', 'Fontes possíveis', 'Referência'], [
     ['Estudos e projetos', faixa(R.linhas.find((l) => l.cod === 'PRE-001').min + R.ind[0].min, R.linhas.find((l) => l.cod === 'PRE-001').max + R.ind[0].max), 'Tesouro municipal; apoio do BNDES à estruturação', '—'],
@@ -344,7 +392,7 @@ const conteudo = [
   espaco(),
 
   // ---------- 9 ----------
-  h1('9. Como transformar em orçamento real'),
+  h1('10. Como transformar em orçamento real'),
   numero('Confirmar a área: matrícula, topografia, sondagens e restrições ambientais.', 'proximos'),
   numero('Fazer o programa de necessidades e medir as áreas reais de cada edifício e instalação.', 'proximos'),
   numero('Orçar com composições SINAPI-SP do mês e cotações documentadas, com data-base e memória de cálculo.', 'proximos'),

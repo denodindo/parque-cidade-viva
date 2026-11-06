@@ -4,6 +4,8 @@
 
 - Estimativa de ordem de grandeza (nov/2026) no app e no site: resumo na aba Orçamento (implantação, operação por ano, equipe), visões por item, equipe e operação e financiamento, faixa nas fichas e no percurso de apresentação.
 - Orçamento rastreável inalterado: preços continuam "A calcular" até haver fonte e data-base.
+- Contas essenciais (luz, água e esgoto, gás, internet, telefone, coleta) por consumo × tarifa e materiais de consumo no custo de operação, que passou a R$ 7,9 mi a R$ 23 mi por ano.
+- Visão "Materiais": preços de referência de 2026 e quantidades dos principais materiais da obra (parte do custo de implantação).
 - Anexo em Word com memória de cálculo e fontes (`docs/Parque_Cidade_Viva_Estimativas_e_Financiamento.docx`).
 
 ## 1.0.0 — empacotamento

@@ -1,0 +1,57 @@
+{
+  "capex": [
+    78919168,
+    183637176
+  ],
+  "essencial": [
+    18982080,
+    49793652
+  ],
+  "integrado": [
+    60005088,
+    134113524
+  ],
+  "ginasio": [
+    33400000,
+    69500000
+  ],
+  "cultural": [
+    16000000,
+    32800000
+  ],
+  "espExt": [
+    873600,
+    1691200
+  ],
+  "opex": [
+    7905260,
+    23109096
+  ],
+  "pessoal": [
+    4913940,
+    11986320
+  ],
+  "pessoas": [
+    79,
+    127
+  ],
+  "folha": [
+    208350,
+    463200
+  ],
+  "imp": [
+    500000,
+    1500000
+  ],
+  "texto": {
+    "capex": "R$ 79 mi a R$ 184 mi",
+    "essencial": "R$ 19 mi a R$ 50 mi",
+    "integrado": "R$ 60 mi a R$ 134 mi",
+    "ginasio": "R$ 33 mi a R$ 70 mi",
+    "cultural": "R$ 16 mi a R$ 33 mi",
+    "espExt": "R$ 874 mil a R$ 1,7 mi",
+    "opex": "R$ 7,9 mi a R$ 23 mi",
+    "pessoal": "R$ 4,9 mi a R$ 12 mi",
+    "folha": "R$ 208 mil a R$ 463 mil"
+  }
+}

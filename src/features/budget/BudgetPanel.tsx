@@ -14,13 +14,14 @@ import {
   type StatusCusto,
   type TipoCusto,
 } from '../../lib/budget-calculator';
-import { AVISO_ESTIMATIVA, EquipeOperacao, EstimativaItens, Financiamento, ResumoEstimativa } from './Estimativa';
+import { AVISO_ESTIMATIVA, EquipeOperacao, EstimativaItens, Financiamento, Materiais, ResumoEstimativa } from './Estimativa';
 
-type Vista = 'rastreavel' | 'itens' | 'equipe' | 'financiamento';
+type Vista = 'rastreavel' | 'itens' | 'equipe' | 'materiais' | 'financiamento';
 const VISTAS: { id: Vista; rotulo: string }[] = [
   { id: 'rastreavel', rotulo: 'Orçamento rastreável' },
   { id: 'itens', rotulo: 'Estimativa por item' },
   { id: 'equipe', rotulo: 'Equipe e operação' },
+  { id: 'materiais', rotulo: 'Materiais' },
   { id: 'financiamento', rotulo: 'Financiamento' },
 ];
 
@@ -84,6 +85,7 @@ export function BudgetPanel() {
 
       {vista === 'itens' && <EstimativaItens />}
       {vista === 'equipe' && <EquipeOperacao />}
+      {vista === 'materiais' && <Materiais />}
       {vista === 'financiamento' && <Financiamento />}
       {vista === 'rastreavel' && (
       <>

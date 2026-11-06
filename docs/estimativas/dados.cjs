@@ -67,11 +67,68 @@ const BEN = [700, 1300];  // benefícios por pessoa por mês (VT, VR, plano)
 
 // Outros OPEX anuais: codigo, item, min, max, base, nota ('pct' = % do CAPEX de obra)
 const opexOutros = [
-  ['OPX-UTL-001', 'Água, energia, gás e internet', 1200000, 3000000, 'H', 'Piscinas aquecidas são o maior consumo.'],
   ['OPX-PIS-001', 'Produtos e insumos das piscinas', 150000, 400000, 'H', ''],
   ['OPX-MAN-001', 'Materiais de manutenção, reposição e contratos técnicos', 'pct', [0.01, 0.02], 'H', '1% a 2% ao ano do custo de obra (regra prática de mercado).'],
   ['OPX-PRG-001', 'Programação: materiais, eventos, transporte e oficineiros', 800000, 2500000, 'H', ''],
   ['OPX-GER-001', 'Seguros, sistemas, auditoria e comunicação', 200000, 600000, 'H', ''],
 ];
 
-module.exports = { CUB, capex, indiretos, implantacaoProgramas, equipe, ENC, BEN, opexOutros };
+// Contas essenciais: consumo mensal [id, item, min, max, nota]
+const energia = [
+  ['ENE-ILU', 'Iluminação externa (150 a 250 postes LED, 12 h por noite)', 3240, 9000, '60 a 100 W por poste'],
+  ['ENE-GIN', 'Ginásio: iluminação, ventilação e equipamentos', 22500, 63000, '2,5 a 5 kWh/m² por mês'],
+  ['ENE-AQC', 'Aquecimento das piscinas (bomba de calor)', 9000, 18000, 'piscina coberta'],
+  ['ENE-FIL', 'Bombas e filtragem das piscinas', 8000, 16000, ''],
+  ['ENE-CUL', 'Centro cultural com climatização', 27000, 72000, '6 a 12 kWh/m² por mês'],
+  ['ENE-APO', 'Apoio, sanitários, quiosques e áreas comuns', 2000, 5000, ''],
+];
+const agua = [
+  ['AGU-PIS', 'Reposição das piscinas (evaporação e retrolavagem)', 150, 300, '1% a 2% de ~520 m³ por dia'],
+  ['AGU-SAN', 'Sanitários, vestiários e duchas', 225, 1200, '1.500 a 4.000 visitas/dia, 5 a 10 L cada'],
+  ['AGU-IRR', 'Irrigação de jardins e gramados', 200, 800, 'cai com água de chuva ou reúso'],
+  ['AGU-LIM', 'Limpeza, horta e bebedouros', 50, 150, ''],
+];
+const T_ENERGIA = [0.70, 1.05], T_AGUA = [30, 48];
+const contasFixas = [
+  ['GAS', 'Gás (reserva do aquecimento)', 0, 5000, 'cozinha do restaurante é do concessionário'],
+  ['NET', 'Internet: 2 links dedicados e Wi-Fi público', 3000, 8000, ''],
+  ['TEL', 'Telefonia', 500, 1500, ''],
+  ['RES', 'Coleta de resíduos (contrato de grande gerador)', 4000, 12000, 'recicláveis podem ir para cooperativa'],
+];
+// Materiais de consumo por ano [id, item, min, max, porPessoa]
+const consumiveis = [
+  ['CON-LIM', 'Limpeza e higiene (papel, sabonete, sacos, produtos)', 96000, 240000, false],
+  ['CON-ESP', 'Material esportivo (bolas, redes, coletes, colchonetes)', 40000, 120000, false],
+  ['CON-JAR', 'Jardinagem e horta (adubo, mudas de reposição, combustível)', 40000, 120000, false],
+  ['CON-UNI', 'Uniformes e equipamentos de proteção (R$ 400 a R$ 800 por pessoa)', 400, 800, true],
+  ['CON-ESC', 'Escritório, impressão e expediente', 20000, 60000, false],
+  ['CON-SEG', 'Extintores, AVCB, dedetização e análises de água', 25000, 70000, false],
+];
+// Preços de referência [material, unidade, preço, fonte]
+const precos = [
+  ['Cimento CP II', 'saco de 50 kg', 'R$ 38,00', 'Lar Pontual, varejo SP, out/2026'],
+  ['Vergalhão de aço CA-50 (8 mm)', 'kg', 'R$ 9,07', 'Lar Pontual, out/2026'],
+  ['Armação de aço pronta', 'kg', 'R$ 16,24', 'Lar Pontual, SP, out/2026, sem BDI'],
+  ['Concreto usinado', 'm³', 'R$ 330 a R$ 680 (fck 25 ≈ R$ 425)', 'Lar Pontual, 2026'],
+  ['Areia média', 'm³', 'R$ 135,00', 'Lar Pontual, out/2026'],
+  ['Brita 1', 'm³', 'R$ 160,00', 'Lar Pontual, out/2026'],
+  ['Bloco intertravado de concreto (6 cm)', 'm²', 'R$ 79,14 a R$ 100,31', 'SINAPI mai/2026 (insumo)'],
+  ['Tinta acrílica', 'lata de 18 L', 'R$ 280,00', 'Lar Pontual, out/2026'],
+  ['Grama esmeralda em placas', 'm²', 'R$ 18,00 (plantio R$ 23,19)', 'SINAPI mai/2026'],
+  ['Muda de árvore ornamental de 2 m', 'unidade', 'R$ 83,60 a R$ 115,31', 'SICRO abr/2026; SINAPI mai/2026'],
+  ['Grama sintética instalada', 'm²', 'R$ 90 a R$ 180', 'guia de mercado 2026'],
+  ['Playground completo (equipamentos)', 'conjunto', 'R$ 51 mil a R$ 61 mil', 'licitações 2026'],
+];
+// Materiais da obra [id, material, qmin, qmax, unidade, pmin, pmax, nota]
+const materiais = [
+  ['MAT-CON', 'Concreto estrutural dos edifícios', 3734, 7013, 'm³', 425, 550, '0,25 a 0,35 m³ por m² construído'],
+  ['MAT-ACO', 'Aço CA-50 das estruturas', 298700, 771400, 'kg', 9, 11, '80 a 110 kg por m³ de concreto; só material'],
+  ['MAT-PAV', 'Blocos intertravados (caminhos, estacionamento, praça)', 13720, 13720, 'm²', 79.14, 100.31, '12.000 + 2.200 + 1.520 m²'],
+  ['MAT-ARE', 'Areia de assentamento dos pisos', 686, 686, 'm³', 135, 135, 'camada de 5 cm'],
+  ['MAT-GRA', 'Grama esmeralda', 12000, 18000, 'm²', 18, 18, '40% a 60% do bosque e jardins'],
+  ['MAT-MUD', 'Mudas de árvores', 300, 600, 'unidades', 83.6, 115.31, 'a maquete mostra cerca de 300 árvores'],
+  ['MAT-SIN', 'Grama sintética do campo society', 2016, 2016, 'm²', 90, 180, 'já instalada'],
+  ['MAT-TIN', 'Tinta acrílica (2 demãos)', 638, 1199, 'latas de 18 L', 280, 345, '2,5 a 3,5 m² de parede por m² construído'],
+];
+
+module.exports = { CUB, capex, indiretos, implantacaoProgramas, equipe, ENC, BEN, opexOutros, energia, agua, T_ENERGIA, T_AGUA, contasFixas, consumiveis, precos, materiais };
