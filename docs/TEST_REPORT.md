@@ -1,5 +1,14 @@
 # Relatório de testes
 
+## Imagens conceituais — 06/11/2026
+
+| Comando | Resultado |
+|---|---|
+| `node docs/capturas/ilustracoes/desenhar.cjs` e `renderizar.cjs` | 10 SVG e 10 PNG (3200×1800), conferidos visualmente; etiquetas tapadas e pessoas cortadas pela faixa de rodapé corrigidas |
+| `npx vite --port 5180` + `node docs/capturas/ilustracoes/capturar.cjs` + `legendar.sh` | 12 vistas da maquete (1920×1080) com título; console sem erros |
+| Caderno `Parque_Cidade_Viva_Caderno_de_Imagens.pdf` | 23 páginas (capa + 22 imagens), capa conferida |
+| `npm run typecheck`, `lint`, `test`, `build` | Sem erros; 56 testes aprovados; o gancho de captura não aparece no build de produção |
+
 ## Contas essenciais e materiais — 06/11/2026
 
 | Comando | Resultado |
