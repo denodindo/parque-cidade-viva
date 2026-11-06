@@ -6,3 +6,16 @@
 # Sistema operacional
 .DS_Store
 Thumbs.db
+
+# Node / Vite
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Playwright
+test-results/
+playwright-report/
+
+# Executáveis gerados
+release/
+docs/capturas/ilustracoes/maquete-bruto/
