@@ -1,0 +1,5 @@
+# Arquivos 3D versionados com Git LFS
+# "lockable" permite travar o arquivo (git lfs lock) para evitar
+# que duas pessoas editem o mesmo binário ao mesmo tempo.
+*.glb   filter=lfs diff=lfs merge=lfs -text lockable
+*.blend filter=lfs diff=lfs merge=lfs -text lockable

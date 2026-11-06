@@ -1,0 +1,8 @@
+# Backups automáticos do Blender
+*.blend1
+*.blend2
+*.blend@
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
