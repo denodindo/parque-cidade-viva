@@ -1,14 +1,13 @@
 import type { ThreeEvent } from '@react-three/fiber';
 import type { Edificio } from '../data/buildings';
 
-/** Dimensões PURAMENTE ilustrativas do volume (não são dimensões de projeto). */
-const LARGURA_ILUSTRATIVA = 70;
-const PROFUNDIDADE_ILUSTRATIVA = 45;
-const ALTURA_NIVEL_ILUSTRATIVA = 6;
+/** Altura por nível PURAMENTE ilustrativa (não é pé-direito de projeto). */
+export const ALTURA_NIVEL_ILUSTRATIVA = 6;
 
 interface Props {
   edificio: Edificio;
-  posicao: readonly [number, number];
+  corA: string;
+  corB: string;
   selecionado: boolean;
   destacado: boolean;
   onClick: (e: ThreeEvent<MouseEvent>) => void;
@@ -16,16 +15,16 @@ interface Props {
   onPointerOut: (e: ThreeEvent<PointerEvent>) => void;
 }
 
-const CORES_NIVEL = ['#e7e2d6', '#d7cfbd', '#e7e2d6', '#d7cfbd'];
-
-export function BuildingFloors({ edificio, posicao, selecionado, destacado, onClick, onPointerOver, onPointerOut }: Props) {
+/** Volume empilhado por nível. Pavimentos explodidos/isolados ficam para o D3. */
+export function BuildingFloors({ edificio, corA, corB, selecionado, destacado, onClick, onPointerOver, onPointerOut }: Props) {
+  const { largura, profundidade } = edificio.planta_ilustrativa;
   return (
-    <group position={[posicao[0], 0, posicao[1]]} name={edificio.objeto_3d_id} onClick={onClick} onPointerOver={onPointerOver} onPointerOut={onPointerOut}>
+    <group position={[edificio.posicao[0], 0, edificio.posicao[1]]} name={edificio.objeto_3d_id} onClick={onClick} onPointerOver={onPointerOver} onPointerOut={onPointerOut}>
       {edificio.niveis.map((n) => (
         <mesh key={n.id} position-y={ALTURA_NIVEL_ILUSTRATIVA * (n.ordem + 0.5)} castShadow receiveShadow>
-          <boxGeometry args={[LARGURA_ILUSTRATIVA, ALTURA_NIVEL_ILUSTRATIVA * 0.94, PROFUNDIDADE_ILUSTRATIVA]} />
+          <boxGeometry args={[largura, ALTURA_NIVEL_ILUSTRATIVA * 0.94, profundidade]} />
           <meshStandardMaterial
-            color={CORES_NIVEL[n.ordem % CORES_NIVEL.length]}
+            color={n.ordem % 2 ? corB : corA}
             emissive={selecionado ? '#d9a441' : '#000000'}
             emissiveIntensity={selecionado ? 0.35 : destacado ? 0.15 : 0}
           />
@@ -34,5 +33,3 @@ export function BuildingFloors({ edificio, posicao, selecionado, destacado, onCl
     </group>
   );
 }
-
-export const ALTURA_TOTAL_ILUSTRATIVA = (niveis: number) => niveis * ALTURA_NIVEL_ILUSTRATIVA;

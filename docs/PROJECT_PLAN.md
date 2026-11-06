@@ -7,9 +7,9 @@ Dois cronogramas **independentes** (PM §10–11):
 | Etapa | Entrega | Situação |
 |---|---|---|
 | **D0** | Leitura, diagnóstico, requisitos, premissas, divergências, backlog, inventário | ✅ Concluída |
-| **D1** | Vertical slice: terreno ilustrativo, câmera orbital, 1 setor, 1 edifício selecionável, tooltip, painel "A calcular" | ✅ Concluída — aguardando validação humana |
-| D2 | Oito setores, dez núcleos, instalações externas leves | ⏸ Não iniciar antes de validar D1 |
-| D3 | Ginásio (4 níveis) e centro cultural (3) com pavimentos explodidos | ⏸ |
+| **D1** | Vertical slice: terreno ilustrativo, câmera orbital, 1 setor, 1 edifício selecionável, tooltip, painel "A calcular" | ✅ Concluída |
+| **D2** | Oito setores, dez núcleos, instalações externas leves | ✅ Concluída — aguardando validação humana |
+| D3 | Ginásio (4 níveis) e centro cultural (3) com pavimentos explodidos | ⏸ Não iniciar antes de validar D2 |
 | D4 | Orçamento por objeto, CAPEX/OPEX, filtros, CSV | ⏸ |
 | D5 | Fichas dos programas sociais | ⏸ |
 | D6 | Percurso SENAC, riscos, fases físicas | ⏸ |

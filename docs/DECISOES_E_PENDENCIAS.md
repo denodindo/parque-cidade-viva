@@ -32,6 +32,20 @@ Regra: em divergência entre documentos, registrar aqui, mostrar a origem e adot
 | DT-08 | TypeScript 6.0.3 em vez do 7.x mais recente | O npm resolveu essa versão para ficar compatível com o `typescript-eslint` |
 | DT-09 | Git LFS para `.glb` e `.blend` com travamento (`lockable`) | Blender/GLB opcionais para refinamento; arquivos binários sem mesclagem |
 
+## Decisões técnicas (D2)
+
+| # | Decisão | Motivo |
+|---|---|---|
+| DT-10 | Setores gerados por fatiamento em faixas (z) e colunas (x) a partir das áreas do quadro, não desenhados à mão | Áreas exatas, sem sobreposição e recalculáveis se o contorno mudar |
+| DT-11 | Setor "circulação" = faixa do eixo principal com a área agregada (12.000 m²); caminhos desenhados em outros setores contam na área desses setores | Regra de atribuição explícita, sem dupla contagem (PM §2) |
+| DT-12 | Núcleos não têm área; referenciam setores, e cada instalação/edifício referencia núcleos | Núcleo ≠ setor (PM §3) |
+| DT-13 | Instalações ligadas a lançamentos **agrupados** do V1 §10.2 (ESP-001, ALI-001 etc.) com `objeto_3d_id` nulo; painel avisa que não há custo individual | Evitar inventar custo por objeto; detalhamento por objeto fica para o D4 |
+| DT-14 | Código SRV-001 criado para edificações de apoio (administração, manutenção, Ponto de Orientação Cidadã) | Não há código equivalente no V1 §10.2; registrado como criação do D2 |
+| DT-15 | Coletores com `setor_id: null` ("distribuído pelo parque") e validação de espaçamento mínimo | Pontos estratégicos em vários setores (V1 §6.4) |
+| DT-16 | Rótulos HTML da cena usam uma camada fixa (`portal`) | Defeito observado: sem ela, o primeiro `<Html>` do drei ficava vazio (o elemento é recriado quando o alvo muda após conectar os eventos) |
+| DT-17 | Rótulos dos setores ligados por padrão só em telas ≥ 760 px | No celular se sobrepõem na faixa central; podem ser ligados manualmente |
+| DT-18 | Ficha do objeto acima da lista na barra lateral | No D1 a ficha ficava abaixo da lista e exigia rolagem |
+
 ## Pendências (externas ao software)
 
 | # | Pendência | Bloqueia |
@@ -50,3 +64,5 @@ Regra: em divergência entre documentos, registrar aqui, mostrar a origem e adot
 - Avisos do Three.js em tempo de execução: `THREE.Clock` obsoleto (vem do R3F) e `PCFSoftShadowMap` substituído por `PCFShadowMap`. Sem efeito visual observado.
 - `npm audit`: 10 avisos moderados (`minimatch`) em ferramentas de desenvolvimento (ESLint/typescript-eslint); não vão para o bundle. A correção sugerida rebaixa o ESLint (quebra de compatibilidade); reavaliar.
 - Seleção tátil não testada em dispositivo real; teste E2E automatizado ainda não existe no projeto.
+- Rótulos dos setores se sobrepõem em telas estreitas (mitigado desligando-os por padrão); posicionamento inteligente fica para o D7.
+- Lançamentos agrupados (ESP-001, ALI-001…) precisam ser desdobrados por objeto no D4, com controle pai/filho.

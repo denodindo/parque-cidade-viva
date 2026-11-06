@@ -1,8 +1,9 @@
 import { Component, lazy, Suspense, useCallback, useEffect, useState, type ReactNode } from 'react';
 import { InfoPanel } from '../components/InfoPanel';
 import { ObjectList } from '../components/ObjectList';
-import { SETOR_ESPORTE_GEOMETRIA, TERRENO } from '../data/terrain';
-import { setorPorId } from '../data/sectors';
+import { INSTALACOES } from '../data/facilities';
+import { SETORES } from '../data/sectors';
+import { TERRENO } from '../data/terrain';
 import type { Selecao } from '../features/selection/selection';
 import { prefereMovimentoReduzido, suportaWebGL } from '../lib/webgl';
 
@@ -13,9 +14,9 @@ function AlternativaTextual({ motivo }: { motivo: string }) {
     <div className="alternativa" role="status">
       <p><strong>Visualização 3D indisponível</strong> ({motivo}).</p>
       <p>
-        A maquete mostra o terreno ilustrativo de {TERRENO.poligono.length} vértices com área de estudo hipotética de 100.000 m², o setor
-        “{setorPorId(SETOR_ESPORTE_GEOMETRIA.setor_id)!.nome}” na faixa inferior e o ginásio multifuncional com quatro níveis. Use a lista ao
-        lado para abrir as fichas.
+        A maquete mostra o terreno ilustrativo de {TERRENO.poligono.length} vértices com área de estudo hipotética de 100.000 m², dividido em{' '}
+        {SETORES.length} setores sem sobreposição, o ginásio multifuncional (quatro níveis), o centro cultural (três níveis) e{' '}
+        {INSTALACOES.length} tipos de instalação. Use a lista ao lado para abrir as fichas.
       </p>
     </div>
   );
@@ -36,6 +37,8 @@ export function App({ webgl: webglForcado }: { webgl?: boolean }) {
   const [selecao, setSelecao] = useState<Selecao | null>(null);
   const [resetCamera, setResetCamera] = useState(0);
   const [reducedMotion] = useState(prefereMovimentoReduzido);
+  // Em telas estreitas os rótulos se sobrepõem na faixa central; começam desligados (D7 refina).
+  const [mostrarRotulos, setMostrarRotulos] = useState(() => typeof window === 'undefined' || window.innerWidth >= 760);
 
   const limpar = useCallback(() => setSelecao(null), []);
   useEffect(() => {
@@ -60,22 +63,27 @@ export function App({ webgl: webglForcado }: { webgl?: boolean }) {
         {webgl ? (
           <LimiteErro3D>
             <Suspense fallback={<p className="carregando">Carregando maquete…</p>}>
-              <ParkScene selecao={selecao} onSelecionar={setSelecao} resetCamera={resetCamera} reducedMotion={reducedMotion} />
+              <ParkScene selecao={selecao} onSelecionar={setSelecao} resetCamera={resetCamera} reducedMotion={reducedMotion} mostrarRotulos={mostrarRotulos} />
             </Suspense>
           </LimiteErro3D>
         ) : (
           <AlternativaTextual motivo="WebGL não disponível neste navegador" />
         )}
         {webgl && (
-          <button type="button" className="visao-geral" onClick={() => setResetCamera((n) => n + 1)}>
-            Visão geral
-          </button>
+          <div className="controles-cena">
+            <button type="button" onClick={() => setResetCamera((n) => n + 1)}>
+              Visão geral
+            </button>
+            <label>
+              <input type="checkbox" checked={mostrarRotulos} onChange={(e) => setMostrarRotulos(e.target.checked)} /> Rótulos dos setores
+            </label>
+          </div>
         )}
       </main>
 
       <aside className="lateral">
-        <ObjectList selecao={selecao} onSelecionar={setSelecao} />
         <InfoPanel selecao={selecao} onFechar={limpar} />
+        <ObjectList selecao={selecao} onSelecionar={setSelecao} />
         <footer className="rodape nota">
           Estudo acadêmico. Não é BIM, projeto executivo, levantamento georreferenciado, orçamento oficial nem gêmeo digital. Áreas, custos e
           capacidades exibidos são hipóteses ou pendências.

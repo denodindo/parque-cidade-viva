@@ -6,8 +6,8 @@ Leia primeiro `CLAUDE.md` e `Parque_Cidade_Viva_Prompt_Mestre_REVISADO.md`. Docu
 
 ## Situação
 
-- **D0** (diagnóstico) e **D1** (vertical slice navegável) concluídas. Ver `docs/TEST_REPORT.md`.
-- D2 a D8 aguardam validação do D1.
+- **D0** (diagnóstico), **D1** (vertical slice) e **D2** (implantação geral: 8 setores, 10 núcleos, instalações) concluídas. Ver `docs/TEST_REPORT.md`.
+- D3 a D8 aguardam validação do D2.
 
 ## Como rodar
 
@@ -39,6 +39,8 @@ modelos/         arquivos .blend e .glb (Git LFS)
 ## Editar dados
 
 - Áreas dos setores: `src/data/sectors.ts` (a soma precisa dar 100.000 m²; o teste falha se não der).
+- Disposição dos setores: `FAIXAS_IMPLANTACAO` em `src/data/layout.ts` (os polígonos são recalculados automaticamente).
+- Instalações: `src/data/facilities.ts`. Os testes verificam se cada instalação cabe no seu setor e não se sobrepõe a outra.
 - Contorno do terreno: `CONTORNO_REFERENCIA_PX` em `src/data/terrain.ts`. Troque por levantamento técnico quando existir.
 - Custos: `src/data/budget.ts`. Deixe `null` quando não houver quantidade, preço, **fonte** e data-base. Nunca use 0 para "sem dado".
 

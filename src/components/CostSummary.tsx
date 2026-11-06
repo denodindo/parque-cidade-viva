@@ -1,9 +1,14 @@
 import { ORCAMENTO } from '../data/budget';
-import { formatarCusto, idsComFilhos, lancamentosDoObjeto, subtotal, textoStatusCusto } from '../lib/budget-calculator';
+import { formatarCusto, idsComFilhos, subtotal, textoStatusCusto, type LancamentoOrcamento } from '../lib/budget-calculator';
 
-/** Custos rastreados de um objeto 3D. Sem dado → "A calcular", nunca R$ 0. */
-export function CostSummary({ objeto3dId }: { objeto3dId: string }) {
-  const itens = lancamentosDoObjeto(ORCAMENTO, objeto3dId);
+interface Props {
+  itens: LancamentoOrcamento[];
+  /** Lançamento agrupado: cobre outros objetos além do selecionado. */
+  agrupado?: boolean;
+}
+
+/** Custos rastreados. Sem dado → "A calcular", nunca R$ 0. */
+export function CostSummary({ itens, agrupado = false }: Props) {
   const pais = idsComFilhos(ORCAMENTO);
   if (itens.length === 0) return <p>Sem lançamento orçamentário vinculado.</p>;
   const pendentes = itens.filter((i) => !pais.has(i.id) && subtotal(i).valor === null).length;
@@ -34,8 +39,10 @@ export function CostSummary({ objeto3dId }: { objeto3dId: string }) {
         </tbody>
       </table>
       <p className="nota">
-        Total do objeto: <strong>A calcular</strong> — {pendentes} lançamento(s) sem quantitativo, preço, fonte e data-base. Fonte prevista:
-        SINAPI-SP ou cotação documentada.
+        {agrupado
+          ? 'Lançamento agrupado: cobre também outras instalações; não há custo individual deste objeto.'
+          : <>Total do objeto: <strong>A calcular</strong> — {pendentes} lançamento(s) sem quantitativo, preço, fonte e data-base.</>}{' '}
+        Fonte prevista: SINAPI-SP ou cotação documentada.
       </p>
     </section>
   );

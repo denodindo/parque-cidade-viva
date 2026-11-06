@@ -1,3 +1,4 @@
+import type { Point } from '../lib/geometry';
 import type { Fonte, StatusEvidencia } from './types';
 
 export interface Nivel {
@@ -15,7 +16,11 @@ export interface Edificio {
   nome: string;
   funcao: string;
   setor_id: string;
-  nucleo: string;
+  nucleos_ids: string[];
+  /** Centro do volume na cena (escala visual normalizada). */
+  posicao: Point;
+  /** Planta do volume na cena: ILUSTRATIVA, não dimensão de projeto. */
+  planta_ilustrativa: { largura: number; profundidade: number };
   status: StatusEvidencia;
   niveis: Nivel[];
   /** Área de projeção no solo e áreas por pavimento: sem dado, logo `null`. */
@@ -36,7 +41,9 @@ export const EDIFICIOS: readonly Edificio[] = [
     nome: 'Ginásio multifuncional',
     funcao: 'Centro aquático, quadras cobertas, academia e convivência em quatro níveis conceituais.',
     setor_id: 'esporte',
-    nucleo: 'Esporte e movimento',
+    nucleos_ids: ['esporte-movimento'],
+    posicao: [40, 125],
+    planta_ilustrativa: { largura: 70, profundidade: 45 },
     status: 'proposto',
     niveis: [
       { id: 'ginasio-terreo', ordem: 0, nome: 'Térreo', funcoes: ['Piscina de referência 25 m (demais dimensões, raias e profundidade a definir)', 'Piscina menor de iniciação', 'Recepção', 'Duchas e vestiários', 'Sanitários acessíveis', 'Primeiros socorros', 'Depósitos', 'Casa de máquinas e tratamento de água'] },
@@ -62,7 +69,9 @@ export const EDIFICIOS: readonly Edificio[] = [
     nome: 'Centro cultural e educacional',
     funcao: 'Auditório, biblioteca e formação em três níveis conceituais.',
     setor_id: 'cultura',
-    nucleo: 'Cultura e criação',
+    nucleos_ids: ['cultura-criacao', 'educacao-futuro'],
+    posicao: [75, 0],
+    planta_ilustrativa: { largura: 50, profundidade: 40 },
     status: 'proposto',
     niveis: [
       { id: 'cultural-terreo', ordem: 0, nome: 'Térreo', funcoes: ['Auditório com meta de até 300 lugares (objetivo, não capacidade licenciada)', 'Palco, bastidores e camarins', 'Controle audiovisual e apoio', 'Sanitários e acessibilidade', 'Saídas de emergência a validar'] },

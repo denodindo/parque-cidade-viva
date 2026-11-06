@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { centroid, clipBelowZ, isConvex, isSimplePolygon, normalizeToArea, polygonArea, stripWithArea } from '../src/lib/geometry';
-import { CONTORNO_REFERENCIA_PX, SETOR_ESPORTE_GEOMETRIA, TERRENO } from '../src/data/terrain';
+import { centroid, clipEixo, dividirPorArea, isConvex, isSimplePolygon, normalizeToArea, particionarSequencial, polygonArea, pontoNoConvexo } from '../src/lib/geometry';
+import { CONTORNO_REFERENCIA_PX, TERRENO } from '../src/data/terrain';
 
 describe('geometria básica', () => {
   const quadrado = [[0, 0], [10, 0], [10, 10], [0, 10]] as const;
@@ -28,10 +28,19 @@ describe('geometria básica', () => {
     expect(cz).toBeCloseTo(0, 9);
   });
 
-  it('recorta faixa com área-alvo por bisseção', () => {
-    expect(polygonArea(clipBelowZ(quadrado, 5))).toBeCloseTo(50, 9);
-    const { polygon } = stripWithArea(quadrado, 30);
-    expect(polygonArea(polygon)).toBeCloseTo(30, 1);
+  it('recorta por eixo e divide por área (bisseção)', () => {
+    expect(polygonArea(clipEixo(quadrado, 'z', 5, 'maior'))).toBeCloseTo(50, 9);
+    const [a, b] = dividirPorArea(quadrado, 'x', 30);
+    expect(polygonArea(a)).toBeCloseTo(30, 2);
+    expect(polygonArea(b)).toBeCloseTo(70, 2);
+    const pecas = particionarSequencial(quadrado, 'z', [10, 20, 70]);
+    expect(pecas.map((p) => Math.round(polygonArea(p)))).toEqual([10, 20, 70]);
+  });
+
+  it('ponto em polígono convexo', () => {
+    expect(pontoNoConvexo(quadrado, [5, 5])).toBe(true);
+    expect(pontoNoConvexo(quadrado, [10, 5])).toBe(true);
+    expect(pontoNoConvexo(quadrado, [11, 5])).toBe(false);
   });
 });
 
@@ -49,11 +58,5 @@ describe('terreno ilustrativo', () => {
   it('rotula a escala como normalizada e não certificada', () => {
     expect(TERRENO.natureza_escala).toBe('escala visual normalizada');
     expect(TERRENO.aviso).toMatch(/escala não certificada/);
-  });
-
-  it('setor de esporte desenhado tem a área hipotética do setor (20.000 m²) e cabe no terreno', () => {
-    expect(isSimplePolygon(SETOR_ESPORTE_GEOMETRIA.polygon)).toBe(true);
-    expect(polygonArea(SETOR_ESPORTE_GEOMETRIA.polygon)).toBeCloseTo(20_000, 1);
-    expect(polygonArea(clipBelowZ(TERRENO.poligono, SETOR_ESPORTE_GEOMETRIA.zCut))).toBeCloseTo(20_000, 1);
   });
 });

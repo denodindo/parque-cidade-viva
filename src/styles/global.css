@@ -42,11 +42,20 @@ h3 { font-size: 0.95rem; margin-top: 0.9rem; }
 
 .cena { position: relative; min-height: 320px; }
 .cena canvas { touch-action: none; }
-.visao-geral {
-  position: absolute; left: 1rem; bottom: 1rem;
+.cena-3d { position: absolute; inset: 0; }
+.sobreposicao { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.controles-cena {
+  position: absolute; left: 1rem; bottom: 1rem; display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;
+}
+.controles-cena button, .controles-cena label {
   padding: 0.5rem 0.9rem; border-radius: 6px; border: 1px solid var(--borda);
   background: var(--painel); color: var(--texto); font: inherit; cursor: pointer;
 }
+.rotulo {
+  padding: 0.15rem 0.45rem; border-radius: 4px; white-space: nowrap; font-size: 0.75rem; font-weight: 600;
+  background: rgba(255, 255, 255, 0.88); color: #1d2a22; border: 1px solid rgba(0, 0, 0, 0.15);
+}
+.rotulo-aviso { background: var(--aviso-fundo); color: var(--aviso-texto); }
 .carregando, .alternativa { padding: 1.5rem; max-width: 60ch; }
 
 .lateral {
@@ -59,6 +68,11 @@ h3 { font-size: 0.95rem; margin-top: 0.9rem; }
   width: 100%; text-align: left; padding: 0.55rem 0.7rem; border-radius: 6px; cursor: pointer;
   border: 1px solid var(--borda); background: #fafbf9; color: var(--texto); font: inherit;
 }
+.lista-objetos button { display: flex; align-items: center; gap: 0.5rem; }
+.lista-objetos .area { margin-left: auto; white-space: nowrap; }
+.amostra { flex: none; width: 0.9rem; height: 0.9rem; border-radius: 3px; border: 1px solid rgba(0, 0, 0, 0.35); }
+.grupo { margin-bottom: 0.5rem; }
+.grupo summary { cursor: pointer; font-weight: 600; padding: 0.3rem 0; }
 .lista-objetos button.ativo { border-color: var(--destaque); background: #e5f2ea; font-weight: 600; }
 
 .painel { position: relative; border: 1px solid var(--borda); border-radius: 8px; padding: 0.9rem; font-size: 0.92rem; }

@@ -1,26 +1,38 @@
-import { ITENS_SELECIONAVEIS, mesmaSelecao, type Selecao } from '../features/selection/selection';
+import { setorPorId } from '../data/sectors';
+import { GRUPOS_SELECIONAVEIS, mesmaSelecao, type Selecao } from '../features/selection/selection';
 
 interface Props {
   selecao: Selecao | null;
   onSelecionar: (s: Selecao) => void;
 }
 
+/** Lista acessível + legenda: setores mostram cor E nome/área (não depende só de cor). */
 export function ObjectList({ selecao, onSelecionar }: Props) {
   return (
     <nav aria-label="Objetos da maquete">
       <h2 className="secao-titulo">Objetos da maquete</h2>
-      <ul className="lista-objetos">
-        {ITENS_SELECIONAVEIS.map((item) => {
-          const ativo = mesmaSelecao(selecao, item.selecao);
-          return (
-            <li key={`${item.selecao.tipo}-${item.selecao.id}`}>
-              <button type="button" aria-pressed={ativo} className={ativo ? 'ativo' : undefined} onClick={() => onSelecionar(item.selecao)}>
-                {item.rotulo}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+      {GRUPOS_SELECIONAVEIS.map((g) => (
+        <details key={g.titulo} className="grupo" open={g.titulo !== 'Instalações'}>
+          <summary>
+            {g.titulo} <span className="nota">({g.itens.length})</span>
+          </summary>
+          <ul className="lista-objetos">
+            {g.itens.map((item) => {
+              const ativo = mesmaSelecao(selecao, item.selecao);
+              const setor = item.selecao.tipo === 'setor' ? setorPorId(item.selecao.id) : undefined;
+              return (
+                <li key={`${item.selecao.tipo}-${item.selecao.id}`}>
+                  <button type="button" aria-pressed={ativo} className={ativo ? 'ativo' : undefined} onClick={() => onSelecionar(item.selecao)}>
+                    {setor ? <span className="amostra" style={{ background: setor.cor }} aria-hidden="true" /> : null}
+                    <span>{item.rotulo}</span>
+                    {setor ? <span className="nota area">{setor.area_territorial_m2.toLocaleString('pt-BR')} m²</span> : null}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      ))}
     </nav>
   );
 }

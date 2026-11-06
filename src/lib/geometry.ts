@@ -108,25 +108,6 @@ export function normalizeToArea(poly: Polygon, targetArea: number): { polygon: P
   return { polygon: scalePolygon(centered, scale), scale };
 }
 
-/**
- * Recorta o polígono pelo semiplano z >= zCut (Sutherland–Hodgman).
- * Correto para polígonos convexos; para côncavos pode gerar arestas degeneradas.
- */
-export function clipBelowZ(poly: Polygon, zCut: number): Point[] {
-  const out: Point[] = [];
-  const inside = (p: Point) => p[1] >= zCut;
-  for (let i = 0; i < poly.length; i++) {
-    const cur = poly[i]!;
-    const next = poly[(i + 1) % poly.length]!;
-    if (inside(cur)) out.push(cur);
-    if (inside(cur) !== inside(next)) {
-      const t = (zCut - cur[1]) / (next[1] - cur[1]);
-      out.push([cur[0] + t * (next[0] - cur[0]), zCut]);
-    }
-  }
-  return out;
-}
-
 export function isConvex(poly: Polygon): boolean {
   let sign = 0;
   const n = poly.length;
@@ -139,24 +120,108 @@ export function isConvex(poly: Polygon): boolean {
   return true;
 }
 
+export type Eixo = 'x' | 'z';
+
+const coord = (p: Point, eixo: Eixo) => (eixo === 'x' ? p[0] : p[1]);
+
 /**
- * Encontra, por bisseção, a faixa z >= zCut do polígono cuja área seja `targetArea`.
- * Usado para posicionar um setor ILUSTRATIVO com a área hipotética dos dados.
+ * Recorta pelo semiplano em que a coordenada do eixo é <= corte (lado 'menor')
+ * ou >= corte (lado 'maior'). Sutherland–Hodgman: exato para polígonos convexos.
  */
-export function stripWithArea(poly: Polygon, targetArea: number, tolerance = 0.01): { polygon: Point[]; zCut: number } {
-  if (!isConvex(poly)) throw new Error('stripWithArea exige polígono convexo.');
-  const total = polygonArea(poly);
-  if (!(targetArea > 0 && targetArea < total)) throw new Error('Área-alvo fora do intervalo (0, área total).');
-  const zs = poly.map((p) => p[1]);
-  let lo = Math.min(...zs); // área recortada = total
-  let hi = Math.max(...zs); // área recortada = 0
-  for (let i = 0; i < 200; i++) {
-    const mid = (lo + hi) / 2;
-    const area = polygonArea(clipBelowZ(poly, mid));
-    if (Math.abs(area - targetArea) <= tolerance) return { polygon: clipBelowZ(poly, mid), zCut: mid };
-    if (area > targetArea) lo = mid;
-    else hi = mid;
+export function clipEixo(poly: Polygon, eixo: Eixo, corte: number, lado: 'menor' | 'maior'): Point[] {
+  const out: Point[] = [];
+  const dentro = (p: Point) => (lado === 'menor' ? coord(p, eixo) <= corte : coord(p, eixo) >= corte);
+  for (let i = 0; i < poly.length; i++) {
+    const cur = poly[i]!;
+    const next = poly[(i + 1) % poly.length]!;
+    if (dentro(cur)) out.push(cur);
+    if (dentro(cur) !== dentro(next)) {
+      const t = (corte - coord(cur, eixo)) / (coord(next, eixo) - coord(cur, eixo));
+      out.push([cur[0] + t * (next[0] - cur[0]), cur[1] + t * (next[1] - cur[1])]);
+    }
   }
-  const zCut = (lo + hi) / 2;
-  return { polygon: clipBelowZ(poly, zCut), zCut };
+  return out;
+}
+
+/**
+ * Divide um polígono convexo por uma reta perpendicular ao eixo, de modo que o
+ * lado de coordenada menor tenha `areaPrimeiro`. Retorna [primeiro, resto].
+ */
+export function dividirPorArea(poly: Polygon, eixo: Eixo, areaPrimeiro: number, tolerancia = 0.001): [Point[], Point[]] {
+  if (!isConvex(poly)) throw new Error('dividirPorArea exige polígono convexo.');
+  const total = polygonArea(poly);
+  if (!(areaPrimeiro > 0 && areaPrimeiro < total)) throw new Error('Área fora do intervalo (0, área total).');
+  const cs = poly.map((p) => coord(p, eixo));
+  let lo = Math.min(...cs);
+  let hi = Math.max(...cs);
+  let corte = (lo + hi) / 2;
+  for (let i = 0; i < 200; i++) {
+    corte = (lo + hi) / 2;
+    const a = polygonArea(clipEixo(poly, eixo, corte, 'menor'));
+    if (Math.abs(a - areaPrimeiro) <= tolerancia) break;
+    if (a < areaPrimeiro) lo = corte;
+    else hi = corte;
+  }
+  return [clipEixo(poly, eixo, corte, 'menor'), clipEixo(poly, eixo, corte, 'maior')];
+}
+
+/** Divide sucessivamente ao longo do eixo; a soma de `areas` deve ser a área do polígono. */
+export function particionarSequencial(poly: Polygon, eixo: Eixo, areas: readonly number[]): Point[][] {
+  const pecas: Point[][] = [];
+  let resto: Point[] = [...poly];
+  areas.forEach((a, i) => {
+    if (i === areas.length - 1) {
+      pecas.push(resto);
+      return;
+    }
+    const [primeiro, r] = dividirPorArea(resto, eixo, a);
+    pecas.push(primeiro);
+    resto = r;
+  });
+  return pecas;
+}
+
+/**
+ * Ponto dentro (ou na borda) de polígono convexo. Pontos a menos de `tolerancia`
+ * metros de uma aresta contam como na borda (absorve arredondamento das interpolações).
+ */
+export function pontoNoConvexo(poly: Polygon, p: Point, tolerancia = 1e-6): boolean {
+  let sinal = 0;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i]!;
+    const b = poly[(i + 1) % poly.length]!;
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (len === 0) continue;
+    const dist = ((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])) / len;
+    if (Math.abs(dist) <= tolerancia) continue;
+    const o = Math.sign(dist);
+    if (sinal === 0) sinal = o;
+    else if (o !== sinal) return false;
+  }
+  return true;
+}
+
+export function bbox(poly: Polygon): { minX: number; maxX: number; minZ: number; maxZ: number } {
+  const xs = poly.map((p) => p[0]);
+  const zs = poly.map((p) => p[1]);
+  return { minX: Math.min(...xs), maxX: Math.max(...xs), minZ: Math.min(...zs), maxZ: Math.max(...zs) };
+}
+
+/** Retângulo alinhado aos eixos, centrado em (cx, cz). */
+export function retangulo(cx: number, cz: number, largura: number, profundidade: number): Point[] {
+  const w = largura / 2;
+  const d = profundidade / 2;
+  return [[cx - w, cz - d], [cx + w, cz - d], [cx + w, cz + d], [cx - w, cz + d]];
+}
+
+export function distancia(a: Point, b: Point): number {
+  return Math.hypot(a[0] - b[0], a[1] - b[1]);
+}
+
+export function distanciaPontoSegmento(p: Point, a: Point, b: Point): number {
+  const dx = b[0] - a[0];
+  const dz = b[1] - a[1];
+  const len2 = dx * dx + dz * dz;
+  const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dz) / len2));
+  return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dz));
 }
