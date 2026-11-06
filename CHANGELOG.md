@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0 — empacotamento
+
+- App desktop com Electron: executável portátil e `.zip` para Windows, AppImage para Linux (`npm run dist:desktop`).
+- Build com caminhos relativos (`base: './'`), usado tanto pelo app desktop quanto pelo site.
+- Renderização 3D por software como reserva no app desktop quando a GPU não estiver disponível.
+
 ## 1.0.0 — 06/11/2026
 
 Entrega das etapas D0–D8 da maquete digital conceitual.

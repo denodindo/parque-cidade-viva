@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  // Caminhos relativos: o mesmo build abre no app desktop (file://) e em qualquer subpasta de site.
+  base: './',
   build: {
     rolldownOptions: {
       output: {

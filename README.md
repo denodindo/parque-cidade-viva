@@ -31,6 +31,29 @@ npm run dev
 
 Outros scripts: `npm run build`, `npm run typecheck`, `npm run test`, `npm run lint` e `npm run e2e` (testes no navegador com Playwright; requer o Chromium do Playwright instalado).
 
+## App desktop (executável)
+
+O mesmo app roda como programa de computador (Electron), offline:
+
+```bash
+npm run desktop
+```
+
+Gerar os instaladores (saem em `release/`, que não vai para o Git):
+
+```bash
+npm run dist:desktop
+```
+
+- Windows: `ParqueCidadeViva-<versão>-windows-portatil.exe` (abre direto, sem instalar) e `...-windows-x64.zip`.
+- Linux: `ParqueCidadeViva-<versão>-linux-x86_64.AppImage` (dar permissão de execução e abrir).
+- Os executáveis não são assinados digitalmente: o Windows pode mostrar o aviso do SmartScreen ("Mais informações" → "Executar assim mesmo").
+- Em computadores sem placa de vídeo compatível, o 3D usa renderização por software (mais lenta); use "Qualidade: baixa".
+
+## Site
+
+`npm run build` gera um site estático em `dist/`, com caminhos relativos: pode ser publicado em qualquer hospedagem estática (inclusive numa subpasta).
+
 ## Estrutura
 
 ```text

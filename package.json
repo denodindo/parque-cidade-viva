@@ -1,7 +1,7 @@
 {
   "name": "parque-cidade-viva",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Maquete digital conceitual 3D (projeto acadêmico SENAC) — não é BIM, projeto executivo nem gêmeo digital.",
   "type": "module",
   "engines": {
@@ -14,7 +14,9 @@
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
     "lint": "eslint .",
-    "e2e": "playwright test --trace off"
+    "e2e": "playwright test --trace off",
+    "desktop": "npm run build && electron .",
+    "dist:desktop": "npm run build && electron-builder --linux AppImage --win portable zip --publish never"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",
@@ -35,6 +37,8 @@
     "@types/react-dom": "19.3.0",
     "@types/three": "0.187.0",
     "@vitejs/plugin-react": "6.2.1",
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0",
     "eslint": "10.14.0",
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.14.0",
@@ -43,5 +47,43 @@
     "typescript-eslint": "8.72.1",
     "vite": "8.3.6",
     "vitest": "5.1.0"
-  }
+  },
+  "main": "electron/main.cjs",
+  "author": {
+    "name": "Projeto acadêmico SENAC — Parque Cidade Viva"
+  },
+  "build": {
+    "appId": "br.senac.parquecidadeviva",
+    "productName": "Parque Cidade Viva",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json",
+      "!node_modules/**/*"
+    ],
+    "asar": true,
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Education",
+      "artifactName": "ParqueCidadeViva-${version}-linux-${arch}.${ext}"
+    },
+    "win": {
+      "target": [
+        "portable",
+        "zip"
+      ],
+      "signAndEditExecutable": false,
+      "artifactName": "ParqueCidadeViva-${version}-windows-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "ParqueCidadeViva-${version}-windows-portatil.${ext}"
+    }
+  },
+  "desktopName": "parque-cidade-viva.desktop"
 }
