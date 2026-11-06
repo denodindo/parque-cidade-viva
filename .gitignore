@@ -11,3 +11,7 @@ Thumbs.db
 node_modules/
 dist/
 *.tsbuildinfo
+
+# Playwright
+test-results/
+playwright-report/

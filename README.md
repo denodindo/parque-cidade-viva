@@ -6,8 +6,16 @@ Leia primeiro `CLAUDE.md` e `Parque_Cidade_Viva_Prompt_Mestre_REVISADO.md`. Docu
 
 ## Situação
 
-- **D0** (diagnóstico), **D1** (vertical slice) e **D2** (implantação geral: 8 setores, 10 núcleos, instalações) concluídas. Ver `docs/TEST_REPORT.md`.
-- D3 a D8 aguardam validação do D2.
+**Versão 1.0.0 — etapas D0 a D8 concluídas** (ver `CHANGELOG.md`, `docs/TEST_REPORT.md` e `docs/LIMITES.md`).
+
+O que dá para fazer:
+
+- **Explorar**: girar, aproximar e clicar em setores, edifícios e instalações; abrir fichas com função, núcleo, estado, fase física, custo e pendências. Tudo também pela lista acessível (teclado).
+- **Pavimentos**: no ginásio (4 níveis) e no centro cultural (3), alternar fechado / explodido / corte e isolar um nível.
+- **Camadas e exibição** (botão sobre a maquete): ligar/desligar camadas temáticas, colorir por situação do custo ou por fase física, modo noite, rótulos e qualidade gráfica.
+- **Orçamento**: estrutura completa, filtros, cobertura e exportação CSV (abre no Excel).
+- **Programas**: 15 programas sociais propostos e oportunidades de editais como referência.
+- **Apresentar**: percurso guiado em 13 passos para a banca do SENAC (setas ← → do teclado).
 
 ## Como rodar
 
@@ -21,7 +29,7 @@ npm ci
 npm run dev
 ```
 
-Outros scripts: `npm run build`, `npm run typecheck`, `npm run test`, `npm run lint`.
+Outros scripts: `npm run build`, `npm run typecheck`, `npm run test`, `npm run lint` e `npm run e2e` (testes no navegador com Playwright; requer o Chromium do Playwright instalado).
 
 ## Estrutura
 
@@ -29,7 +37,10 @@ Outros scripts: `npm run build`, `npm run typecheck`, `npm run test`, `npm run l
 src/data/        dados-semente (setores, edifícios, orçamento, terreno)
 src/lib/         geometria, cálculo orçamentário, validação, detecção de WebGL
 src/scene/       cena 3D (React Three Fiber)
-src/components/  lista de objetos, ficha, custos
+src/components/  lista de objetos, ficha, custos, controles da cena
+src/features/    orçamento, programas sociais, apresentação, seleção
+src/app/         App e estado compartilhado (Zustand)
+e2e/             testes ponta a ponta (Playwright + axe)
 tests/           Vitest
 docs/            requisitos, premissas, decisões, plano, backlog, relatório de testes
 referencias/     imagens de referência (não são planta cadastral)

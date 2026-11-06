@@ -15,4 +15,6 @@ Toda premissa abaixo é **hipótese de trabalho** e pode ser substituída por da
 | P-09 | Data das fontes exibida: 05/11/2026 (data dos documentos) | `informado` | Capas dos PDFs | Painel |
 | P-10 | Instalações (campo 56 × 36 m, quadras 28 × 16 m, praça r = 22 m, anfiteatro r = 16 m etc.): tamanhos **ilustrativos** para a maquete, sem homologação esportiva nem norma | `hipotetico` | Decisão de D2 | `src/data/facilities.ts` |
 | P-11 | Árvores distribuídas por sorteio determinístico (≈ 300) só para representar sombra/massa vegetal; **não** é inventário arbóreo nem projeto paisagístico | `hipotetico` | Decisão de D2 | `src/lib/vegetation.ts` |
+| P-13 | Fase física de cada espaço (F1–F4) | `proposto` | Decisão do D3–D7 com base no PM §11 | `src/data/phases.ts` |
+| P-14 | Arranjo interno dos pavimentos (quadras, aparelhos, estantes, poltronas) | `hipotetico` | Decisão do D3; só a piscina de 25 m é informada | `src/scene/Interior.tsx` |
 | P-12 | Espaçamento mínimo de 15 m entre pontos de coleta, usado só como trava contra a ideia de "lixeira a cada 2 m"; posição e número reais dependem do plano de resíduos | `proposto` | Decisão de D2 | `ESPACAMENTO_MINIMO_COLETORES_M` |

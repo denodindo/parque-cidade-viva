@@ -54,3 +54,36 @@ describe('orçamento', () => {
     expect(resumoPorTipo([capex, opex, pendente], 'OPEX_anual').total_parcial_brl).toBe(50);
   });
 });
+
+import { gerarCsv, protegerCelula } from '../src/lib/budget-calculator';
+
+describe('exportação CSV', () => {
+  it('protege contra injeção de fórmula', () => {
+    for (const v of ['=SOMA(A1)', '+1', '-2', '@x', '\tx']) expect(protegerCelula(v).startsWith("'")).toBe(true);
+    expect(protegerCelula('Ginásio')).toBe('Ginásio');
+  });
+
+  it('cabeçalho, avisos, nulos vazios (não zero) e pai marcado', () => {
+    const csv = gerarCsv(ORCAMENTO, '2026-11-06');
+    const linhas = csv.trim().split('\r\n');
+    expect(linhas[0]).toMatch(/exportado em 2026-11-06/);
+    expect(csv).toMatch(/NÃO significam zero/);
+    const cab = linhas.find((l) => l.startsWith('codigo;'))!.split(';');
+    const gin = linhas.find((l) => l.startsWith('GIN-001;'))!.split(';');
+    expect(gin[cab.indexOf('subtotal_brl')]).toBe('');
+    expect(gin[cab.indexOf('custo_unitario_brl')]).toBe('');
+    expect(gin[cab.indexOf('status')]).toBe('A cotar');
+    expect(gin[cab.indexOf('entra_no_total_parcial')]).toMatch(/^nao/);
+    expect(linhas.length).toBe(3 + 1 + ORCAMENTO.length);
+  });
+
+  it('escapa aspas e separador e aplica proteção dentro do texto', () => {
+    const csv = gerarCsv([{ ...base, id: 'Z', nome: '=HYPERLINK("x";"y")' }], 'hoje');
+    expect(csv).toContain(`"'=HYPERLINK(""x"";""y"")"`);
+  });
+
+  it('CAPEX e OPEX ficam em linhas próprias com tipo explícito', () => {
+    const csv = gerarCsv(ORCAMENTO, 'hoje');
+    expect(csv).toMatch(/OPX-PES-001;[^\r\n]*;OPEX_anual;/);
+  });
+});

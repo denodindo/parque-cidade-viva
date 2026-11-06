@@ -39,3 +39,31 @@ describe('dados-semente', () => {
     expect(g.area_construida_total_m2).toBeNull();
   });
 });
+
+import { PROGRAMAS } from '../src/data/programs';
+import { FASE_POR_OBJETO } from '../src/data/phases';
+import { auditarTextos, FRASES_PROIBIDAS } from '../src/lib/validation';
+
+describe('programas, fases e textos (D5–D6)', () => {
+  it('programas são propostas com capacidade a definir e indicadores propostos', () => {
+    expect(PROGRAMAS.length).toBeGreaterThanOrEqual(12);
+    for (const p of PROGRAMAS) {
+      expect(p.status).toBe('proposto');
+      expect(p.capacidade_hipotetica).toBeNull();
+      expect(p.indicadores_propostos.length).toBeGreaterThan(0);
+    }
+    const limites = PROGRAMAS.map((p) => p.limite ?? '').join(' ');
+    expect(limites).toMatch(/não é escola certificadora/);
+    expect(limites).toMatch(/não é Centro POP/);
+    expect(limites).toMatch(/Não garante emprego/);
+  });
+
+  it('todo setor, edifício e instalação tem fase física proposta (F1–F4)', () => {
+    expect(Object.values(FASE_POR_OBJETO).every((f) => ['F1', 'F2', 'F3', 'F4'].includes(f))).toBe(true);
+  });
+
+  it('auditoria de textos não encontra afirmações de parceria, vaga, licença ou financiamento confirmados', () => {
+    expect(auditarTextos()).toEqual([]);
+    expect(FRASES_PROIBIDAS.some((r) => r.test('parceria confirmada com a prefeitura'))).toBe(true);
+  });
+});

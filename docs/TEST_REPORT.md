@@ -1,5 +1,41 @@
 # Relatório de testes
 
+## D3 a D8 — 06/11/2026 (entrega final)
+
+Ambiente: Node v22.23.4, npm 10.9.9, Chromium do Playwright 1.63.0 (WebGL por SwiftShader).
+
+### Comandos executados e resultados reais (a partir de `rm -rf node_modules dist`)
+
+| Comando | Resultado |
+|---|---|
+| `npm ci` | OK |
+| `npm run typecheck` | Código de saída 0 |
+| `npm run lint` | Código de saída 0, sem avisos |
+| `npm run test` | **5 arquivos, 46 testes, 46 aprovados** |
+| `npm run build` | Código de saída 0, **sem avisos**. Blocos: inicial 303 kB (93 kB gzip); cena 25 kB; R3F/Drei 210 kB; Three.js 743 kB (188 kB gzip), os dois últimos só com a cena |
+| `npm run e2e` | **7 testes, 7 aprovados** (fluxo completo, clique no canvas, celular, axe em 4 abas) |
+| `npm audit --omit=dev` | 0 vulnerabilidades nas dependências de produção |
+| `npm audit` | 10 moderadas, todas em ferramentas de desenvolvimento (`minimatch` via ESLint) |
+
+### Cobertura por etapa
+
+- **D3** (`tests/selection.test.tsx`): centro cultural com 3 níveis e seletor `Todos/Térreo/1º/2º`; isolar 1º destaca a biblioteca e abre o modo explodido; ginásio com modos fechado/explodido/corte e 4 níveis; isolar 2º destaca a musculação. Visual: `d3-ginasio-explodido.png`, `d3-cultural.png`.
+- **D4** (`tests/budget.test.ts`, `selection`): cobertura 0% e "sem itens com dados"; nenhum "R$ 0,00" na página; filtro OPEX só mostra `OPX-*`; CSV com avisos, vazios no lugar de nulos, pai marcado, proteção contra `=`, `+`, `-`, `@`, escape de aspas e `;`. E2E baixa o CSV e confere o conteúdo. Visual: `d4-orcamento.png`.
+- **D5** (`tests/data.test.ts`, `selection`): 15 programas `proposto`, capacidade `null`, indicadores propostos, limites (não certificadora, não Centro POP, não garante emprego); links para espaços abrem a ficha; validação de espaços e custos referenciados.
+- **D6** (`selection`): percurso de 13 passos por botão e setas; passo 5 explode o ginásio; passo de fases ativa as cores por fase; matriz de riscos; "Sair" restaura. Visual: `d6-custos.png`, `d6-fases.png`.
+- **D7**: presets de qualidade (troca para "baixa" verificada sem erro), modo noite (`d7-noite.png`), camadas (`d7-camadas.png`), bundle dividido.
+- **D8**: E2E + axe (WCAG 2 A/AA) **sem violações sérias ou críticas** nas abas Explorar (com ficha aberta), Orçamento, Programas e Apresentar; auditoria automática de textos proibidos sem ocorrências.
+
+### Não verificado / limitações
+
+- Leitor de tela e toque em aparelho real: não testados (só emulação e axe).
+- Violações axe de impacto "moderado"/"menor" não foram listadas nem tratadas.
+- WebGL foi verificado só por renderização em software (SwiftShader); GPUs reais podem variar.
+- Desempenho medido apenas qualitativamente (sem FPS em hardware de referência).
+
+---
+
+
 ## D2 — 06/11/2026
 
 Mesmo ambiente do D1 (Node v22.23.4, npm 10.9.9, Chromium do Playwright com WebGL por SwiftShader).

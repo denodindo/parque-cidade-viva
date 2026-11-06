@@ -16,7 +16,8 @@ export interface LancamentoOrcamento {
   id: string;
   objeto_3d_id: string | null;
   nome: string;
-  setor_id: string;
+  /** `null` = parque todo (sem setor único). */
+  setor_id: string | null;
   categoria: string;
   tipo: TipoCusto;
   quantidade: number | null;
@@ -112,4 +113,45 @@ export function formatarCusto(valor: number | null): string {
 
 export function textoStatusCusto(s: StatusCusto): string {
   return TEXTO_STATUS[s];
+}
+
+export const ROTULO_TIPO: Record<TipoCusto, string> = {
+  CAPEX: 'CAPEX — implantação',
+  implantacao_programas: 'Implantação de programas',
+  OPEX_anual: 'OPEX — operação (anual)',
+  OPEX_mensal: 'OPEX — operação (mensal)',
+};
+
+/** Neutraliza injeção de fórmula em planilhas (=, +, -, @, tab, CR). */
+export function protegerCelula(v: string): string {
+  return /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
+}
+
+function celula(v: string | number | null): string {
+  if (v === null) return '';
+  const s = typeof v === 'number' ? String(v) : protegerCelula(v);
+  return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+/**
+ * CSV (separador ";" e vírgula decimal não usada: números em ponto) com
+ * cabeçalho de procedência. Valores ausentes ficam vazios e o status explica.
+ */
+export function gerarCsv(itens: readonly LancamentoOrcamento[], exportadoEm: string): string {
+  const pais = idsComFilhos(itens);
+  const cab = ['codigo', 'item', 'tipo', 'setor', 'objeto_3d', 'pai', 'entra_no_total_parcial', 'quantidade', 'unidade', 'custo_unitario_brl', 'subtotal_brl', 'fonte', 'data_base', 'status', 'observacoes'];
+  const linhas = itens.map((l) => {
+    const sub = subtotal(l).valor;
+    return [
+      l.id, l.nome, l.tipo, l.setor_id ?? 'parque todo', l.objeto_3d_id, l.parent_id,
+      l.incluido_no_total && !pais.has(l.id) ? 'sim' : 'nao (pai: somam os filhos)',
+      l.quantidade, l.unidade, l.custo_unitario_brl, sub, l.fonte, l.data_base, textoStatusCusto(l.status), l.observacoes ?? null,
+    ].map(celula).join(';');
+  });
+  const avisos = [
+    `# Parque Cidade Viva — orçamento conceitual exportado em ${exportadoEm}`,
+    '# Estudo acadêmico. Valores vazios = sem quantitativo, preço, fonte ou data-base (NÃO significam zero).',
+    '# CAPEX e OPEX são categorias distintas e não devem ser somadas.',
+  ];
+  return [...avisos, cab.join(';'), ...linhas].join('\r\n') + '\r\n';
 }

@@ -1,11 +1,15 @@
-import { Component, lazy, Suspense, useCallback, useEffect, useState, type ReactNode } from 'react';
+import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { InfoPanel } from '../components/InfoPanel';
 import { ObjectList } from '../components/ObjectList';
+import { LegendaModo, SceneControls } from '../components/SceneControls';
 import { INSTALACOES } from '../data/facilities';
 import { SETORES } from '../data/sectors';
 import { TERRENO } from '../data/terrain';
-import type { Selecao } from '../features/selection/selection';
+import { BudgetPanel } from '../features/budget/BudgetPanel';
+import { PresentationPanel } from '../features/presentation/PresentationPanel';
+import { SocialPanel } from '../features/social/SocialPanel';
 import { prefereMovimentoReduzido, suportaWebGL } from '../lib/webgl';
+import { useParque, type Aba } from './store';
 
 const ParkScene = lazy(() => import('../scene/ParkScene').then((m) => ({ default: m.ParkScene })));
 
@@ -16,7 +20,8 @@ function AlternativaTextual({ motivo }: { motivo: string }) {
       <p>
         A maquete mostra o terreno ilustrativo de {TERRENO.poligono.length} vértices com área de estudo hipotética de 100.000 m², dividido em{' '}
         {SETORES.length} setores sem sobreposição, o ginásio multifuncional (quatro níveis), o centro cultural (três níveis) e{' '}
-        {INSTALACOES.length} tipos de instalação. Use a lista ao lado para abrir as fichas.
+        {INSTALACOES.length} tipos de instalação. Use a lista e as abas ao lado: todas as fichas, pavimentos, orçamento, programas e a apresentação
+        funcionam sem 3D.
       </p>
     </div>
   );
@@ -32,25 +37,38 @@ class LimiteErro3D extends Component<{ children: ReactNode }, { erro: boolean }>
   }
 }
 
+const ABAS: { id: Aba; nome: string }[] = [
+  { id: 'explorar', nome: 'Explorar' },
+  { id: 'orcamento', nome: 'Orçamento' },
+  { id: 'programas', nome: 'Programas' },
+  { id: 'apresentacao', nome: 'Apresentar' },
+];
+
 export function App({ webgl: webglForcado }: { webgl?: boolean }) {
   const [webgl] = useState(() => webglForcado ?? suportaWebGL());
-  const [selecao, setSelecao] = useState<Selecao | null>(null);
-  const [resetCamera, setResetCamera] = useState(0);
   const [reducedMotion] = useState(prefereMovimentoReduzido);
-  // Em telas estreitas os rótulos se sobrepõem na faixa central; começam desligados (D7 refina).
-  const [mostrarRotulos, setMostrarRotulos] = useState(() => typeof window === 'undefined' || window.innerWidth >= 760);
+  const aba = useParque((s) => s.aba);
+  const setAba = useParque((s) => s.setAba);
+  const noite = useParque((s) => s.noite);
 
-  const limpar = useCallback(() => setSelecao(null), []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') limpar();
+      if (e.key === 'Escape') useParque.getState().selecionar(null);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [limpar]);
+  }, []);
+
+  const moverAba = (e: React.KeyboardEvent, i: number) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const prox = ABAS[(i + (e.key === 'ArrowRight' ? 1 : ABAS.length - 1)) % ABAS.length]!;
+    setAba(prox.id);
+    document.getElementById(`aba-${prox.id}`)?.focus();
+  };
 
   return (
-    <div className="layout">
+    <div className={`layout${noite ? ' noite' : ''}`}>
       <header className="topo">
         <div>
           <h1>Parque Cidade Viva</h1>
@@ -63,27 +81,45 @@ export function App({ webgl: webglForcado }: { webgl?: boolean }) {
         {webgl ? (
           <LimiteErro3D>
             <Suspense fallback={<p className="carregando">Carregando maquete…</p>}>
-              <ParkScene selecao={selecao} onSelecionar={setSelecao} resetCamera={resetCamera} reducedMotion={reducedMotion} mostrarRotulos={mostrarRotulos} />
+              <ParkScene reducedMotion={reducedMotion} />
             </Suspense>
           </LimiteErro3D>
         ) : (
           <AlternativaTextual motivo="WebGL não disponível neste navegador" />
         )}
-        {webgl && (
-          <div className="controles-cena">
-            <button type="button" onClick={() => setResetCamera((n) => n + 1)}>
-              Visão geral
-            </button>
-            <label>
-              <input type="checkbox" checked={mostrarRotulos} onChange={(e) => setMostrarRotulos(e.target.checked)} /> Rótulos dos setores
-            </label>
-          </div>
-        )}
+        {webgl && <SceneControls />}
+        {webgl && <LegendaModo />}
       </main>
 
       <aside className="lateral">
-        <InfoPanel selecao={selecao} onFechar={limpar} />
-        <ObjectList selecao={selecao} onSelecionar={setSelecao} />
+        <div role="tablist" aria-label="Seções" className="abas">
+          {ABAS.map((a, i) => (
+            <button
+              key={a.id}
+              id={`aba-${a.id}`}
+              role="tab"
+              type="button"
+              aria-selected={aba === a.id}
+              aria-controls={`painel-${a.id}`}
+              tabIndex={aba === a.id ? 0 : -1}
+              onClick={() => setAba(a.id)}
+              onKeyDown={(e) => moverAba(e, i)}
+            >
+              {a.nome}
+            </button>
+          ))}
+        </div>
+        <div role="tabpanel" id={`painel-${aba}`} aria-labelledby={`aba-${aba}`} className="conteudo-aba">
+          {aba === 'explorar' && (
+            <>
+              <InfoPanel />
+              <ObjectList />
+            </>
+          )}
+          {aba === 'orcamento' && <BudgetPanel />}
+          {aba === 'programas' && <SocialPanel />}
+          {aba === 'apresentacao' && <PresentationPanel />}
+        </div>
         <footer className="rodape nota">
           Estudo acadêmico. Não é BIM, projeto executivo, levantamento georreferenciado, orçamento oficial nem gêmeo digital. Áreas, custos e
           capacidades exibidos são hipóteses ou pendências.

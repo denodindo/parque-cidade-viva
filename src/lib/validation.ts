@@ -3,6 +3,9 @@ import { ORCAMENTO } from '../data/budget';
 import { INSTALACOES, pegadas } from '../data/facilities';
 import { CAMINHOS, GEOMETRIA_SETORES } from '../data/layout';
 import { NUCLEOS } from '../data/nucleos';
+import { FASE_POR_OBJETO } from '../data/phases';
+import { PASSOS } from '../data/presentation';
+import { OPORTUNIDADES, PROGRAMAS } from '../data/programs';
 import { AREA_ESTUDO_M2, SETORES } from '../data/sectors';
 import { TERRENO } from '../data/terrain';
 import { validarLancamento } from './budget-calculator';
@@ -63,8 +66,27 @@ export function validarDados(): string[] {
     if (i.posicoes.length === 0) erros.push(`${i.id}: sem posição`);
   }
 
+  const espacos = new Set([...EDIFICIOS.map((e) => e.id), ...INSTALACOES.map((i) => i.id), ...SETORES.map((x) => x.id)]);
+  for (const p of PROGRAMAS) {
+    if (p.status === 'verificado') erros.push(`${p.id}: programa marcado como verificado sem evidência`);
+    if (p.espacos_ids.length === 0) erros.push(`${p.id}: sem espaço`);
+    for (const e of p.espacos_ids) if (!espacos.has(e)) erros.push(`${p.id}: espaço inexistente ${e}`);
+    if (p.custo_recorrente_id !== null && !orcamentoIds.has(p.custo_recorrente_id)) erros.push(`${p.id}: custo inexistente ${p.custo_recorrente_id}`);
+    if (p.indicadores_propostos.length === 0) erros.push(`${p.id}: sem indicadores propostos`);
+  }
+
+  for (const id of espacos) if (!FASE_POR_OBJETO[id]) erros.push(`${id}: sem fase física proposta`);
+  for (const id of Object.keys(FASE_POR_OBJETO)) if (!espacos.has(id)) erros.push(`fase para objeto inexistente ${id}`);
+
+  for (const passo of PASSOS) {
+    const s = passo.selecao;
+    if (s && s.tipo !== 'terreno' && !espacos.has(s.id)) erros.push(`passo ${passo.id}: seleção inexistente ${s.id}`);
+  }
+
+  erros.push(...auditarTextos());
+
   for (const o of ORCAMENTO) {
-    if (!setores.has(o.setor_id)) erros.push(`${o.id}: setor inexistente ${o.setor_id}`);
+    if (o.setor_id !== null && !setores.has(o.setor_id)) erros.push(`${o.id}: setor inexistente ${o.setor_id}`);
     if (o.objeto_3d_id !== null && !objetos.has(o.objeto_3d_id)) erros.push(`${o.id}: objeto 3D inexistente ${o.objeto_3d_id}`);
     if (o.parent_id !== null && !orcamentoIds.has(o.parent_id)) erros.push(`${o.id}: pai inexistente ${o.parent_id}`);
     erros.push(...validarLancamento(o));
@@ -132,4 +154,27 @@ export function validarImplantacao(): string[] {
     for (const p of c.pontos) if (!pontoNoConvexo(terreno, p)) erros.push(`${c.id}: ponto fora do terreno (${p.join(', ')})`);
   }
   return erros;
+}
+
+/**
+ * Frases que afirmariam como confirmado algo que os documentos dizem estar
+ * pendente (parcerias, vagas, licenças, financiamento, capacidade licenciada).
+ */
+export const FRASES_PROIBIDAS: readonly RegExp[] = [
+  /parceria[s]? (confirmada|firmada|garantida)/i,
+  /vaga[s]? garantida/i,
+  /emprego garantido/i,
+  /aprova[çc][ãa]o garantida/i,
+  /financiamento (aprovado|garantido|assegurado)/i,
+  /recursos? (aprovado|garantido|obtido)s?/i,
+  /licen[çc]a[s]? (aprovada|emitida|obtida)/i,
+  /licenciamento aprovado/i,
+  /capacidade licenciada de/i,
+  /custo total do parque[:=]/i,
+  /g[êe]meo digital conectado/i,
+];
+
+export function auditarTextos(): string[] {
+  const texto = JSON.stringify([SETORES, NUCLEOS, EDIFICIOS, INSTALACOES, ORCAMENTO, PROGRAMAS, OPORTUNIDADES, PASSOS]);
+  return FRASES_PROIBIDAS.filter((r) => r.test(texto)).map((r) => `Texto proibido encontrado: ${r}`);
 }

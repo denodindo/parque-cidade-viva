@@ -45,12 +45,26 @@ h3 { font-size: 0.95rem; margin-top: 0.9rem; }
 .cena-3d { position: absolute; inset: 0; }
 .sobreposicao { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .controles-cena {
-  position: absolute; left: 1rem; bottom: 1rem; display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;
+  position: absolute; left: 1rem; bottom: 1rem; z-index: 50; display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;
 }
-.controles-cena button, .controles-cena label {
+.controles-cena > button, .menu-cena > summary {
   padding: 0.5rem 0.9rem; border-radius: 6px; border: 1px solid var(--borda);
-  background: var(--painel); color: var(--texto); font: inherit; cursor: pointer;
+  background: var(--painel); color: var(--texto); font: inherit; cursor: pointer; list-style: none;
 }
+.menu-cena { position: relative; }
+.menu-conteudo {
+  position: absolute; bottom: calc(100% + 0.4rem); left: 0; width: min(300px, 80vw); max-height: 60vh; overflow-y: auto;
+  background: var(--painel); color: var(--texto); border: 1px solid var(--borda); border-radius: 8px; padding: 0.6rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18); font-size: 0.9rem;
+}
+.menu-conteudo fieldset { border: none; margin: 0 0 0.5rem; padding: 0; display: grid; gap: 0.25rem; }
+.menu-conteudo legend { font-weight: 700; margin-bottom: 0.2rem; }
+.legenda-modo {
+  position: absolute; right: 1rem; bottom: 1rem; z-index: 40; background: var(--painel); color: var(--texto); border: 1px solid var(--borda);
+  border-radius: 8px; padding: 0.5rem 0.7rem; font-size: 0.85rem; max-width: 260px;
+}
+.legenda-modo ul { list-style: none; margin: 0.3rem 0 0; padding: 0; display: grid; gap: 0.2rem; }
+.legenda-modo li { display: flex; align-items: center; gap: 0.4rem; }
 .rotulo {
   padding: 0.15rem 0.45rem; border-radius: 4px; white-space: nowrap; font-size: 0.75rem; font-weight: 600;
   background: rgba(255, 255, 255, 0.88); color: #1d2a22; border: 1px solid rgba(0, 0, 0, 0.15);
@@ -70,7 +84,7 @@ h3 { font-size: 0.95rem; margin-top: 0.9rem; }
 }
 .lista-objetos button { display: flex; align-items: center; gap: 0.5rem; }
 .lista-objetos .area { margin-left: auto; white-space: nowrap; }
-.amostra { flex: none; width: 0.9rem; height: 0.9rem; border-radius: 3px; border: 1px solid rgba(0, 0, 0, 0.35); }
+.amostra { display: inline-block; vertical-align: middle; flex: none; width: 0.9rem; height: 0.9rem; border-radius: 3px; border: 1px solid rgba(0, 0, 0, 0.35); }
 .grupo { margin-bottom: 0.5rem; }
 .grupo summary { cursor: pointer; font-weight: 600; padding: 0.3rem 0; }
 .lista-objetos button.ativo { border-color: var(--destaque); background: #e5f2ea; font-weight: 600; }
@@ -90,6 +104,42 @@ h3 { font-size: 0.95rem; margin-top: 0.9rem; }
 .tabela-custo th, .tabela-custo td { text-align: left; padding: 0.3rem; border-bottom: 1px solid var(--borda); vertical-align: top; }
 .tabela-custo th { background: #e8eee8; color: var(--texto); }
 .rodape { margin-top: auto; }
+
+.abas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.2rem; border-bottom: 1px solid var(--borda); }
+.abas [role='tab'] {
+  padding: 0.5rem 0.2rem; border: 1px solid transparent; border-bottom: none; border-radius: 6px 6px 0 0;
+  background: transparent; color: var(--texto-suave); font: inherit; font-size: 0.85rem; cursor: pointer; overflow: hidden; text-overflow: ellipsis;
+}
+.abas [role='tab'][aria-selected='true'] { background: #e5f2ea; color: var(--texto); border-color: var(--borda); font-weight: 700; }
+.conteudo-aba { display: flex; flex-direction: column; gap: 1rem; }
+.painel-aba { display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.92rem; }
+.painel-aba h3 { margin-top: 0.6rem; }
+.cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.5rem; }
+.cartao { display: grid; gap: 0.2rem; padding: 0.6rem; border: 1px solid var(--borda); border-radius: 8px; background: #fafbf9; font-size: 0.85rem; }
+.filtros { border: 1px solid var(--borda); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.6rem; }
+.filtros label { display: grid; gap: 0.2rem; font-size: 0.85rem; }
+.filtros select, .filtros input { font: inherit; padding: 0.3rem; border: 1px solid var(--borda); border-radius: 4px; min-width: 0; }
+.tabela-rolagem { overflow-x: auto; }
+.botao {
+  padding: 0.5rem 0.9rem; border-radius: 6px; border: 1px solid var(--destaque); background: var(--destaque); color: #fff;
+  font: inherit; cursor: pointer; justify-self: start; align-self: flex-start;
+}
+.botao.secundario { background: transparent; color: var(--destaque); }
+.botao:disabled { opacity: 0.45; cursor: not-allowed; }
+.link { background: none; border: none; padding: 0; color: var(--destaque); text-decoration: underline; font: inherit; cursor: pointer; text-align: left; }
+.segmentado { display: flex; flex-wrap: wrap; gap: 0.25rem; margin: 0.3rem 0; }
+.segmentado button {
+  padding: 0.35rem 0.6rem; border: 1px solid var(--borda); border-radius: 6px; background: #fafbf9; color: var(--texto); font: inherit; cursor: pointer;
+}
+.segmentado button[aria-pressed='true'] { background: var(--destaque); color: #fff; border-color: var(--destaque); }
+.nivel-ativo { background: #fff4d6; border-radius: 4px; }
+.nivel-inativo { opacity: 0.55; }
+.programa { border: 1px solid var(--borda); border-radius: 8px; padding: 0.5rem 0.7rem; margin-bottom: 0.4rem; }
+.programa summary { cursor: pointer; font-weight: 600; }
+.navegacao-passos { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.apresentacao h2 { font-size: 1.3rem; }
+
+.layout.noite .cena { background: #0f1824; }
 
 .tooltip {
   display: grid; gap: 0.1rem; padding: 0.35rem 0.55rem; border-radius: 6px; white-space: nowrap;

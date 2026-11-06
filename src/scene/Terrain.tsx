@@ -17,17 +17,22 @@ interface Props {
   altura: number;
   selecionado: boolean;
   destacado: boolean;
-  onClick: (e: ThreeEvent<MouseEvent>) => void;
+  apagado?: boolean;
+  onClick?: (e: ThreeEvent<MouseEvent>) => void;
   onPointerOver?: (e: ThreeEvent<PointerEvent>) => void;
   onPointerOut?: (e: ThreeEvent<PointerEvent>) => void;
 }
 
-export function FlatPolygon({ poligono, cor, altura, selecionado, destacado, onClick, onPointerOver, onPointerOut }: Props) {
+export function FlatPolygon({ poligono, cor, altura, selecionado, destacado, apagado = false, onClick, onPointerOver, onPointerOut }: Props) {
   const shape = useMemo(() => shapeFromPolygon(poligono), [poligono]);
   return (
     <mesh rotation-x={-Math.PI / 2} position-y={altura} receiveShadow onClick={onClick} onPointerOver={onPointerOver} onPointerOut={onPointerOut}>
       <shapeGeometry args={[shape]} />
-      <meshStandardMaterial color={cor} emissive={selecionado ? '#ffffff' : '#000000'} emissiveIntensity={selecionado ? 0.18 : destacado ? 0.08 : 0} />
+      <meshStandardMaterial
+        color={apagado ? '#c9cec9' : cor}
+        emissive={selecionado ? '#ffffff' : '#000000'}
+        emissiveIntensity={selecionado ? 0.22 : destacado ? 0.1 : 0}
+      />
     </mesh>
   );
 }

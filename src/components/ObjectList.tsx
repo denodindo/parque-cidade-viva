@@ -1,13 +1,11 @@
 import { setorPorId } from '../data/sectors';
-import { GRUPOS_SELECIONAVEIS, mesmaSelecao, type Selecao } from '../features/selection/selection';
-
-interface Props {
-  selecao: Selecao | null;
-  onSelecionar: (s: Selecao) => void;
-}
+import { useParque } from '../app/store';
+import { GRUPOS_SELECIONAVEIS, mesmaSelecao } from '../features/selection/selection';
 
 /** Lista acessível + legenda: setores mostram cor E nome/área (não depende só de cor). */
-export function ObjectList({ selecao, onSelecionar }: Props) {
+export function ObjectList() {
+  const selecao = useParque((s) => s.selecao);
+  const onSelecionar = useParque((s) => s.selecionar);
   return (
     <nav aria-label="Objetos da maquete">
       <h2 className="secao-titulo">Objetos da maquete</h2>

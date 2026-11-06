@@ -26,18 +26,27 @@ interface Props {
   instalacao: Instalacao;
   selecionado: boolean;
   destacado: boolean;
+  apagado: boolean;
+  /** Cor imposta pelo modo de cor (custos/fases), ou null. */
+  corModo: string | null;
   onClick: (e: ThreeEvent<MouseEvent>) => void;
   onPointerOver: (e: ThreeEvent<PointerEvent>) => void;
   onPointerOut: (e: ThreeEvent<PointerEvent>) => void;
 }
 
-function Material({ cor, selecionado, destacado }: { cor: string; selecionado: boolean; destacado: boolean }) {
-  return <meshStandardMaterial color={cor} emissive={selecionado ? '#d9a441' : '#000000'} emissiveIntensity={selecionado ? 0.45 : destacado ? 0.2 : 0} />;
+function Material({ cor, selecionado, destacado, apagado = false }: { cor: string; selecionado: boolean; destacado: boolean; apagado?: boolean }) {
+  return (
+    <meshStandardMaterial
+      color={apagado ? '#d3d7d3' : cor}
+      emissive={selecionado ? '#d9a441' : '#000000'}
+      emissiveIntensity={selecionado ? 0.45 : destacado ? 0.2 : 0}
+    />
+  );
 }
 
 /** Geometria leve e ilustrativa de cada instalação. */
-export function Facility({ instalacao: i, selecionado, destacado, ...handlers }: Props) {
-  const cor = COR[i.tipo];
+export function Facility({ instalacao: i, selecionado, destacado, apagado, corModo, ...handlers }: Props) {
+  const cor = corModo ?? COR[i.tipo];
   const f = i.forma;
   return (
     <group name={i.id} {...handlers}>
@@ -47,14 +56,14 @@ export function Facility({ instalacao: i, selecionado, destacado, ...handlers }:
             LIXEIRAS.map((c, n) => (
               <mesh key={c} position={[(n - 1.5) * 0.55, i.altura / 2, 0]} castShadow>
                 <cylinderGeometry args={[0.25, 0.22, i.altura, 8]} />
-                <Material cor={selecionado ? '#ffd166' : c} selecionado={selecionado} destacado={destacado} />
+                <Material cor={selecionado ? '#ffd166' : corModo ?? c} selecionado={selecionado} destacado={destacado} apagado={apagado} />
               </mesh>
             ))
           ) : f.tipo === 'retangulo' ? (
             <>
               <mesh position-y={i.altura / 2} castShadow={i.altura > 1} receiveShadow>
                 <boxGeometry args={[f.largura, i.altura, f.profundidade]} />
-                <Material cor={cor} selecionado={selecionado} destacado={destacado} />
+                <Material cor={cor} selecionado={selecionado} destacado={destacado} apagado={apagado} />
               </mesh>
               {(i.tipo === 'campo' || i.tipo === 'quadra') && (
                 <Line
@@ -81,14 +90,14 @@ export function Facility({ instalacao: i, selecionado, destacado, ...handlers }:
           ) : f.tipo === 'circulo' ? (
             <mesh position-y={i.altura / 2} receiveShadow>
               <cylinderGeometry args={[f.raio, f.raio, i.altura, 40]} />
-              <Material cor={cor} selecionado={selecionado} destacado={destacado} />
+              <Material cor={cor} selecionado={selecionado} destacado={destacado} apagado={apagado} />
             </mesh>
           ) : (
             // semicírculo em degraus (anfiteatro): degrau externo mais alto, palco ao centro
             [1, 0.75, 0.5].map((r, n) => (
               <mesh key={r} position-y={(i.altura * (3 - n)) / 6} rotation-y={Math.PI / 2} receiveShadow>
                 <cylinderGeometry args={[f.raio * r, f.raio * r, (i.altura * (3 - n)) / 3, 32, 1, false, 0, Math.PI]} />
-                <Material cor={n % 2 ? '#bfae90' : cor} selecionado={selecionado} destacado={destacado} />
+                <Material cor={n % 2 && !corModo ? '#bfae90' : cor} selecionado={selecionado} destacado={destacado} apagado={apagado} />
               </mesh>
             ))
           )}
