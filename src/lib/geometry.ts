@@ -1,0 +1,162 @@
+/**
+ * Geometria 2D do terreno ilustrativo.
+ *
+ * Coordenadas no plano (x, z), em metros de uma escala visual NORMALIZADA.
+ * Nada aqui representa medição topográfica, cadastral ou georreferenciada.
+ */
+
+export type Point = readonly [x: number, z: number];
+export type Polygon = readonly Point[];
+
+/** Área com sinal pela fórmula do laço (shoelace). */
+export function signedArea(poly: Polygon): number {
+  let sum = 0;
+  for (let i = 0; i < poly.length; i++) {
+    const [x1, z1] = poly[i]!;
+    const [x2, z2] = poly[(i + 1) % poly.length]!;
+    sum += x1 * z2 - x2 * z1;
+  }
+  return sum / 2;
+}
+
+export function polygonArea(poly: Polygon): number {
+  return Math.abs(signedArea(poly));
+}
+
+export function centroid(poly: Polygon): Point {
+  const a = signedArea(poly);
+  if (a === 0) throw new Error('Polígono degenerado (área zero).');
+  let cx = 0;
+  let cz = 0;
+  for (let i = 0; i < poly.length; i++) {
+    const [x1, z1] = poly[i]!;
+    const [x2, z2] = poly[(i + 1) % poly.length]!;
+    const cross = x1 * z2 - x2 * z1;
+    cx += (x1 + x2) * cross;
+    cz += (z1 + z2) * cross;
+  }
+  return [cx / (6 * a), cz / (6 * a)];
+}
+
+function orientation(p: Point, q: Point, r: Point): number {
+  const v = (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
+  return Math.abs(v) < 1e-12 ? 0 : Math.sign(v);
+}
+
+function onSegment(p: Point, q: Point, r: Point): boolean {
+  return (
+    Math.min(p[0], r[0]) <= q[0] && q[0] <= Math.max(p[0], r[0]) &&
+    Math.min(p[1], r[1]) <= q[1] && q[1] <= Math.max(p[1], r[1])
+  );
+}
+
+export function segmentsIntersect(a1: Point, a2: Point, b1: Point, b2: Point): boolean {
+  const o1 = orientation(a1, a2, b1);
+  const o2 = orientation(a1, a2, b2);
+  const o3 = orientation(b1, b2, a1);
+  const o4 = orientation(b1, b2, a2);
+  if (o1 !== o2 && o3 !== o4) return true;
+  if (o1 === 0 && onSegment(a1, b1, a2)) return true;
+  if (o2 === 0 && onSegment(a1, b2, a2)) return true;
+  if (o3 === 0 && onSegment(b1, a1, b2)) return true;
+  if (o4 === 0 && onSegment(b1, a2, b2)) return true;
+  return false;
+}
+
+/**
+ * Polígono simples: ao menos 3 vértices, área não nula, sem vértices repetidos
+ * e sem auto-interseção entre arestas não adjacentes.
+ */
+export function isSimplePolygon(poly: Polygon): boolean {
+  const n = poly.length;
+  if (n < 3 || polygonArea(poly) === 0) return false;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      if (poly[i]![0] === poly[j]![0] && poly[i]![1] === poly[j]![1]) return false;
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    const a1 = poly[i]!;
+    const a2 = poly[(i + 1) % n]!;
+    for (let j = i + 1; j < n; j++) {
+      const adjacent = j === i + 1 || (i === 0 && j === n - 1);
+      if (adjacent) continue;
+      if (segmentsIntersect(a1, a2, poly[j]!, poly[(j + 1) % n]!)) return false;
+    }
+  }
+  return true;
+}
+
+/** Escala uniforme em torno da origem. */
+export function scalePolygon(poly: Polygon, factor: number): Point[] {
+  return poly.map(([x, z]) => [x * factor, z * factor] as const);
+}
+
+export function translatePolygon(poly: Polygon, dx: number, dz: number): Point[] {
+  return poly.map(([x, z]) => [x + dx, z + dz] as const);
+}
+
+/**
+ * Normaliza o polígono para uma área-alvo: centraliza no centroide e
+ * aplica escala uniforme. Retorna o fator usado para registro/transparência.
+ */
+export function normalizeToArea(poly: Polygon, targetArea: number): { polygon: Point[]; scale: number } {
+  if (!(targetArea > 0)) throw new Error('Área-alvo deve ser positiva.');
+  const [cx, cz] = centroid(poly);
+  const centered = translatePolygon(poly, -cx, -cz);
+  const scale = Math.sqrt(targetArea / polygonArea(centered));
+  return { polygon: scalePolygon(centered, scale), scale };
+}
+
+/**
+ * Recorta o polígono pelo semiplano z >= zCut (Sutherland–Hodgman).
+ * Correto para polígonos convexos; para côncavos pode gerar arestas degeneradas.
+ */
+export function clipBelowZ(poly: Polygon, zCut: number): Point[] {
+  const out: Point[] = [];
+  const inside = (p: Point) => p[1] >= zCut;
+  for (let i = 0; i < poly.length; i++) {
+    const cur = poly[i]!;
+    const next = poly[(i + 1) % poly.length]!;
+    if (inside(cur)) out.push(cur);
+    if (inside(cur) !== inside(next)) {
+      const t = (zCut - cur[1]) / (next[1] - cur[1]);
+      out.push([cur[0] + t * (next[0] - cur[0]), zCut]);
+    }
+  }
+  return out;
+}
+
+export function isConvex(poly: Polygon): boolean {
+  let sign = 0;
+  const n = poly.length;
+  for (let i = 0; i < n; i++) {
+    const o = orientation(poly[i]!, poly[(i + 1) % n]!, poly[(i + 2) % n]!);
+    if (o === 0) continue;
+    if (sign === 0) sign = o;
+    else if (o !== sign) return false;
+  }
+  return true;
+}
+
+/**
+ * Encontra, por bisseção, a faixa z >= zCut do polígono cuja área seja `targetArea`.
+ * Usado para posicionar um setor ILUSTRATIVO com a área hipotética dos dados.
+ */
+export function stripWithArea(poly: Polygon, targetArea: number, tolerance = 0.01): { polygon: Point[]; zCut: number } {
+  if (!isConvex(poly)) throw new Error('stripWithArea exige polígono convexo.');
+  const total = polygonArea(poly);
+  if (!(targetArea > 0 && targetArea < total)) throw new Error('Área-alvo fora do intervalo (0, área total).');
+  const zs = poly.map((p) => p[1]);
+  let lo = Math.min(...zs); // área recortada = total
+  let hi = Math.max(...zs); // área recortada = 0
+  for (let i = 0; i < 200; i++) {
+    const mid = (lo + hi) / 2;
+    const area = polygonArea(clipBelowZ(poly, mid));
+    if (Math.abs(area - targetArea) <= tolerance) return { polygon: clipBelowZ(poly, mid), zCut: mid };
+    if (area > targetArea) lo = mid;
+    else hi = mid;
+  }
+  const zCut = (lo + hi) / 2;
+  return { polygon: clipBelowZ(poly, zCut), zCut };
+}

@@ -1,0 +1,52 @@
+[
+  {
+    "file": "CLAUDE.md",
+    "bytes": 1763,
+    "sha256": "a17897096ffc0c33273476b177a955d4f0a36bead9af9703f96a041a9c96706e"
+  },
+  {
+    "file": "LEIA-ME.txt",
+    "bytes": 899,
+    "sha256": "7b8dffb7ce97a087500a620ed266a26bb9f43ee64628b69003319d623b252439"
+  },
+  {
+    "file": "Parque_Cidade_Viva_Estudo_Conceitual.pdf",
+    "bytes": 470273,
+    "sha256": "28e69ec36baaaa1127544d8164c25948ee58bd3bdb5d3d0662aaced83ac13de6"
+  },
+  {
+    "file": "Parque_Cidade_Viva_Estudo_Conceitual_V2_Visao_Ampliada.pdf",
+    "bytes": 66742,
+    "sha256": "1893cc7bae7eae9d5ffc07fdd05b4f6eb34a8ec859b6b0805e2e935f95e88b47"
+  },
+  {
+    "file": "Parque_Cidade_Viva_Prompt_Mestre_REVISADO.md",
+    "bytes": 31536,
+    "sha256": "c8a7435c54e4cc8e8e218643d7d4232a7f4a922ae1017653009b8578e008a0e9"
+  },
+  {
+    "file": "Parque_Cidade_Viva_Prompt_Mestre_REVISADO.pdf",
+    "bytes": 75909,
+    "sha256": "b440a9cbf8c4020b7f7ad8841063d9bd5445850c2c13e3cbb20abf5f35365723"
+  },
+  {
+    "file": "Relatorio_Mensal_Oportunidades_Parque_Cidade_Viva_2026-11-05.pdf",
+    "bytes": 43258,
+    "sha256": "7eeb20627e5dddd56f56e5aaf227eaa5adef4ff959ef2826a4c2876a4adb19dc"
+  },
+  {
+    "file": "referencias/distribuicao_original.jpeg",
+    "bytes": 39943,
+    "sha256": "81619168e370d46966d514f856254de3e471bd113ca83ce38eaf225f9cede69d"
+  },
+  {
+    "file": "referencias/terreno_poligono.jpeg",
+    "bytes": 113384,
+    "sha256": "7fbec3d22b42b23c0ca1ebc2585feed9226512e7fe9ee2457634c7a364394bd7"
+  },
+  {
+    "file": "referencias/terreno_sem_preenchimento.jpeg",
+    "bytes": 122177,
+    "sha256": "4cb387358c57713e96ce7bbe039cf6769ee240156c5da715b129d33aa722c5fa"
+  }
+]

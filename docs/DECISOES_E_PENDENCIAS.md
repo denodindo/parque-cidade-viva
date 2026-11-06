@@ -1,0 +1,52 @@
+# Decisões e pendências
+
+Regra: em divergência entre documentos, registrar aqui, mostrar a origem e adotar a interpretação **conservadora** (PM §1).
+
+## Divergências entre documentos
+
+| # | Divergência | Origem | Decisão adotada |
+|---|---|---|---|
+| DV-01 | O quadro original soma 95.000 m², mas declara 100.000 m² | `distribuicao_original.jpeg` × V1 §3 | Reserva proposta de 5.000 m² para inclusão/horta; soma verificada por teste |
+| DV-02 | V1 §4 fala em "oito núcleos" (iguais aos setores); V2 §4 e PM §3 em "dez núcleos funcionais" | V1 × V2/PM | Setores (8, territoriais) e núcleos (10, funcionais) são entidades distintas; núcleo referencia setor sem somar área (D2) |
+| DV-03 | Piscina "semiolímpica de 25 m" (V1 §5.1, V2 §5.1) × "piscina de referência 25 m" (PM §4.1) | V1/V2 × PM | Redação do PM: 25 m de referência; dimensões, raias e profundidade a definir |
+| DV-04 | Piscina menor "de iniciação/terapia" (V1) × "de iniciação" (PM) | V1 × PM | "Iniciação"; uso terapêutico só com profissionais e pactuação (pendência) |
+| DV-05 | 3º pavimento do ginásio: V1 sem tênis de mesa; V2 com tênis de mesa e e-sports educativos; PM com tênis de mesa e salas multiuso | V1 × V2 × PM | Programa do PM; e-sports educativos ficam como opção da V2, não modelada |
+| DV-06 | Fases físicas: V1 §13 tem 6 fases (0–5) com equipamentos principais antes dos espaços externos; V2 §15 e PM §11 têm F0–F4 com "parque essencial" primeiro | V1 × V2/PM | F0–F4 do PM (garante OPEX antes de equipamentos complexos). Fases físicas não definem a ordem do software |
+| DV-07 | Nomes de programas: "Esporte para Todos", "Primeira Oportunidade", "Comunidade Ativa" (V1) × "Movimento para Todos", "Estação de Oportunidades" etc. (V2) | V1 × V2 | Seguir a tabela do PM §6 em D5; nomes da V2 marcados como propostas de programação |
+| DV-08 | Restaurante com café, almoço e jantar (V1 §6.2) × "sem presumir operação completa desde o primeiro dia" (V2 §9) | V1 × V2 | Conservador (V2): horários a definir por demanda |
+| DV-09 | Exportação CSV/XLSX/PDF (V1 §11.1) × CSV local (PM §7.7) | V1 × PM | CSV local no MVP (D4); XLSX/PDF no backlog |
+| DV-10 | Stack V1 inclui Framer Motion, Tailwind, Zustand, Recharts e "banco de dados conforme escopo"; PM pede o mínimo e nada remoto | V1 × PM | D1 usa só React, R3F e Drei; demais bibliotecas apenas quando uma etapa exigir |
+| DV-11 | V1 §11.1: tooltip de custo no hover; PM §7.3: hover é só melhoria, clique/teclado obrigatórios | V1 × PM | Ambos: seleção por clique e lista acessível; tooltip no hover como complemento |
+
+## Decisões técnicas (D1)
+
+| # | Decisão | Motivo |
+|---|---|---|
+| DT-01 | Terreno = quadrilátero convexo lido da imagem, normalizado para 100.000 m² e rotulado "escala visual normalizada" | PM §2: não extrair medidas exatas da captura |
+| DT-02 | Setor de esporte recortado por bisseção (faixa z ≥ zCut) até 20.000 m² | Mostra um setor coerente com os dados sem sobrepor áreas |
+| DT-03 | Lista acessível é a forma principal de seleção; a cena 3D tem `aria-hidden` | Garante seleção por teclado e leitores de tela sem depender do WebGL |
+| DT-04 | Cena carregada sob demanda (`React.lazy`) e envolvida por limite de erro → alternativa textual | Fallback quando WebGL falha; página nunca fica em branco |
+| DT-05 | Sem Zustand em D1: estado local em `App` | Só há um estado compartilhado simples; evitar dependência sem uso (PM §9) |
+| DT-06 | Somente lançamentos folha são somados; pais com filhos ficam fora do total parcial | PM §8: impedir dupla contagem |
+| DT-07 | Valor com preço mas sem fonte é inválido (`valor sem fonte`) | PM §8 e CL: não inventar custo |
+| DT-08 | TypeScript 6.0.3 em vez do 7.x mais recente | O npm resolveu essa versão para ficar compatível com o `typescript-eslint` |
+| DT-09 | Git LFS para `.glb` e `.blend` com travamento (`lockable`) | Blender/GLB opcionais para refinamento; arquivos binários sem mesclagem |
+
+## Pendências (externas ao software)
+
+| # | Pendência | Bloqueia |
+|---|---|---|
+| PE-01 | Matrícula, perímetro, topografia e área reais do terreno | Substituir o contorno ilustrativo |
+| PE-02 | Norte e escala reais | Orientação correta da maquete |
+| PE-03 | Titularidade e autorização da trilha / área ecológica vizinha | Ligação tracejada da trilha (D2) |
+| PE-04 | Estudo estrutural, acústico e de evacuação das quadras elevadas | Remover aviso de viabilidade do ginásio |
+| PE-05 | Quantitativos, composições SINAPI-SP, cotações e data-base | Qualquer valor monetário |
+| PE-06 | Pactuação de programas sociais (SUAS, SUS, escolas, OSCs) | Status além de `proposto` em D5 |
+| PE-07 | Termos de uso das capturas de satélite, se o repositório for público | Manter `referencias/` versionado |
+
+## Pendências do software (abertas após D1)
+
+- Aviso de bundle grande (> 500 kB) no `build`, vindo do Three.js/Drei; tratar em D7 com divisão de código.
+- Avisos do Three.js em tempo de execução: `THREE.Clock` obsoleto (vem do R3F) e `PCFSoftShadowMap` substituído por `PCFShadowMap`. Sem efeito visual observado.
+- `npm audit`: 10 avisos moderados (`minimatch`) em ferramentas de desenvolvimento (ESLint/typescript-eslint); não vão para o bundle. A correção sugerida rebaixa o ESLint (quebra de compatibilidade); reavaliar.
+- Seleção tátil não testada em dispositivo real; teste E2E automatizado ainda não existe no projeto.

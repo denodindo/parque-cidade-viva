@@ -1,0 +1,16 @@
+PARQUE CIDADE VIVA - PACOTE REVISADO PARA CLAUDE CODE
+Revisao: 2.1 - 05/11/2026
+
+1. Extraia esta pasta no computador.
+2. Abra a pasta extraida no Claude Code (terminal ou editor).
+3. O arquivo CLAUDE.md contem instrucoes permanentes.
+4. Cole este comando no Claude Code:
+   Leia CLAUDE.md e Parque_Cidade_Viva_Prompt_Mestre_REVISADO.md, depois os 3 PDFs originais e 3 imagens em referencias/. Execute apenas D0 e D1. Nao invente dados e rode build e testes reais. Consulte a secao 15 do prompt mestre.
+5. NAO autorize de uma vez as etapas D2 a D8. Valide a primeira entrega antes.
+
+ATENCAO:
+- A area de 100.000 m2 e uma hipotese, nao levantamento cadastral.
+- O orcamento nao contem precos reais validados.
+- Editais nao representam financiamento aprovado.
+- Plugins podem ser gratuitos para instalar, mas Claude Code pode ter custos.
+- PDFs sao referencia academica; nao sao projeto de engenharia.
