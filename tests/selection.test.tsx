@@ -23,6 +23,7 @@ describe('seleção sem WebGL (lista acessível)', () => {
     expect(p.getByText(/4 \(térreo \+ 3 pavimentos\)/)).toBeTruthy();
     expect(p.getByText(/sujeito a estudo estrutural/)).toBeTruthy();
     expect(p.getByTestId('custo-GIN-001').textContent).toBe('A calcular');
+    expect(p.getByTestId('estimativa-objeto-ginasio-multifuncional').textContent).toBe('R$ 33 mi a R$ 70 mi');
     expect(painel.textContent).not.toMatch(/R\$\s*0/);
   });
 
@@ -101,6 +102,21 @@ describe('abas: orçamento, programas e apresentação', () => {
     expect(linhas.length).toBeGreaterThan(0);
     expect(linhas.every((id) => id!.startsWith('orc-OPX-'))).toBe(true);
     expect(screen.getByRole('button', { name: /Exportar CSV/ })).toBeTruthy();
+  });
+
+  it('orçamento mostra a estimativa em faixas, equipe e financiamento, separados do rastreável', () => {
+    render(<App webgl={false} />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Orçamento' }));
+    expect(screen.getByTestId('estimativa-capex').textContent).toBe('R$ 79 mi a R$ 184 mi');
+    expect(screen.getByTestId('estimativa-opex').textContent).toBe('R$ 7,9 mi a R$ 21 mi');
+    fireEvent.click(screen.getByRole('button', { name: 'Estimativa por item' }));
+    expect(screen.getByTestId('est-GIN-001').textContent).toBe('R$ 31 mi a R$ 63 mi');
+    expect(screen.queryByRole('button', { name: /Exportar CSV/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Equipe e operação' }));
+    expect(screen.getByText(/Professores de educação física/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Financiamento' }));
+    expect(screen.getByText('Ministério do Esporte')).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/R\$\s*0,00/);
   });
 
   it('programas: fichas propostas com limites e oportunidades como referência', () => {

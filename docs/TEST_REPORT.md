@@ -1,5 +1,20 @@
 # Relatório de testes
 
+## Estimativas no app, no site e no desktop — 06/11/2026
+
+| Comando | Resultado |
+|---|---|
+| `npm run typecheck` | Código de saída 0 |
+| `npm run lint` | Código de saída 0, sem avisos |
+| `npm run test` | **6 arquivos, 53 testes, 53 aprovados** (novo `tests/estimate.test.ts`: totais iguais ao anexo, orçamento rastreável ainda nulo, sem dupla contagem, ginásio = obra + piscinas + equipamentos; `selection`: resumo, visões e faixa na ficha do ginásio) |
+| `npm run build` | Código de saída 0, sem avisos |
+| `npm run e2e` | **10 testes, 10 aprovados**; axe sem violações sérias ou críticas também nas visões Estimativa por item, Equipe e operação e Financiamento (uma violação `scrollable-region-focusable` foi encontrada e corrigida) |
+| Playwright (Chromium headless) sobre `vite preview` | Capturas `docs/capturas/d9-*.png`; console sem erros |
+| `npm run dist:desktop` | Gerou `.exe` portátil, `.zip` Windows e AppImage Linux; o texto novo está no `app.asar` das duas plataformas |
+| App Linux empacotado em Xvfb (12 s) | Abriu e ficou em execução sem travar; só avisos de rasterização do display virtual. **Sem captura de tela** desta vez |
+
+Site de prévia republicado com o build novo. Executáveis Windows continuam sem execução real (sem Windows no ambiente).
+
 ## Anexo de estimativas e financiamento — 06/11/2026
 
 Pedido do responsável: faixas de valor por item, equipe e salários, e quem pode financiar. Não altera o aplicativo (orçamento continua "A calcular"; ver DT-35).

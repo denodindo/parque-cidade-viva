@@ -1,4 +1,5 @@
 import { EDIFICIOS } from '../data/buildings';
+import { ESTIMATIVA_CAPEX, ESTIMATIVA_EQUIPE, FINANCIAMENTO } from '../data/estimates';
 import { ORCAMENTO } from '../data/budget';
 import { INSTALACOES, pegadas } from '../data/facilities';
 import { CAMINHOS, GEOMETRIA_SETORES } from '../data/layout';
@@ -91,6 +92,14 @@ export function validarDados(): string[] {
     if (o.parent_id !== null && !orcamentoIds.has(o.parent_id)) erros.push(`${o.id}: pai inexistente ${o.parent_id}`);
     erros.push(...validarLancamento(o));
   }
+  // Estimativa de ordem de grandeza (DT-35): códigos e objetos existentes, faixas coerentes.
+  const alvosEstimativa = new Set([...EDIFICIOS.map((e) => e.objeto_3d_id), ...INSTALACOES.map((x) => x.id), ...SETORES.map((x) => x.id), 'terreno']);
+  for (const l of ESTIMATIVA_CAPEX) {
+    if (!orcamentoIds.has(l.codigo_orcamento)) erros.push(`Estimativa ${l.id}: lançamento ${l.codigo_orcamento} inexistente`);
+    for (const o of l.objetos) if (!alvosEstimativa.has(o)) erros.push(`Estimativa ${l.id}: objeto ${o} inexistente`);
+    if (!(l.qmin > 0 && l.umin > 0 && l.qmin <= l.qmax && l.umin <= l.umax)) erros.push(`Estimativa ${l.id}: faixa inválida`);
+  }
+  for (const f of ESTIMATIVA_EQUIPE) if (!(f.qmin > 0 && f.smin > 0 && f.qmin <= f.qmax && f.smin <= f.smax)) erros.push(`Equipe ${f.funcao}: faixa inválida`);
   return erros;
 }
 
@@ -175,6 +184,6 @@ export const FRASES_PROIBIDAS: readonly RegExp[] = [
 ];
 
 export function auditarTextos(): string[] {
-  const texto = JSON.stringify([SETORES, NUCLEOS, EDIFICIOS, INSTALACOES, ORCAMENTO, PROGRAMAS, OPORTUNIDADES, PASSOS]);
+  const texto = JSON.stringify([SETORES, NUCLEOS, EDIFICIOS, INSTALACOES, ORCAMENTO, PROGRAMAS, OPORTUNIDADES, PASSOS, ESTIMATIVA_CAPEX, ESTIMATIVA_EQUIPE, FINANCIAMENTO]);
   return FRASES_PROIBIDAS.filter((r) => r.test(texto)).map((r) => `Texto proibido encontrado: ${r}`);
 }

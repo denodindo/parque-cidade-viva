@@ -1,3 +1,5 @@
+import { DATA_BASE_ESTIMATIVA } from '../../data/estimates';
+import { capexTotal, formatarFaixa, opexAnual } from '../../lib/estimativa';
 import { useCallback, useEffect } from 'react';
 import { useParque } from '../../app/store';
 import { ORCAMENTO } from '../../data/budget';
@@ -81,6 +83,10 @@ export function PresentationPanel() {
       )}
       {p.extra === 'orcamento' && (
         <ul>
+          <li>
+            Estimativa de ordem de grandeza ({DATA_BASE_ESTIMATIVA}): implantação <strong>{formatarFaixa(capexTotal())}</strong> e operação{' '}
+            <strong>{formatarFaixa(opexAnual())}</strong> por ano. Não é orçamento; detalhes na aba Orçamento.
+          </li>
           {(['CAPEX', 'implantacao_programas', 'OPEX_anual'] as const).map((t) => {
             const r = resumoPorTipo(ORCAMENTO, t);
             return (

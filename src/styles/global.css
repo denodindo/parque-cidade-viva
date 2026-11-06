@@ -116,6 +116,18 @@ h3 { font-size: 0.95rem; margin-top: 0.9rem; }
 .painel-aba h3 { margin-top: 0.6rem; }
 .cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.5rem; }
 .cartao { display: grid; gap: 0.2rem; padding: 0.6rem; border: 1px solid var(--borda); border-radius: 8px; background: #fafbf9; font-size: 0.85rem; }
+.valor-faixa { font-size: 1.05rem; font-weight: 700; color: var(--destaque); }
+.subvistas { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.6rem 0; }
+.subvistas .botao { background: transparent; color: var(--destaque); padding: 0.35rem 0.6rem; font-size: 0.85rem; }
+.subvistas .botao[aria-pressed='true'] { background: var(--destaque); color: #fff; }
+.sem-quebra { white-space: nowrap; }
+.col-valor { text-align: right; }
+.item-titulo { display: block; }
+.detalhe { display: block; font-size: 0.78rem; color: var(--texto-suave); margin-top: 0.15rem; }
+.linha-total td { font-weight: 700; background: #f0f4ee; }
+.bloco-estimativa { margin-top: 0.6rem; padding: 0.6rem; border: 1px dashed var(--borda); border-radius: 8px; }
+.bloco-estimativa h3 { margin: 0 0 0.2rem; font-size: 0.95rem; }
+.bloco-estimativa .valor-faixa { margin: 0.2rem 0; }
 .filtros { border: 1px solid var(--borda); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.6rem; }
 .filtros label { display: grid; gap: 0.2rem; font-size: 0.85rem; }
 .filtros select, .filtros input { font: inherit; padding: 0.3rem; border: 1px solid var(--borda); border-radius: 4px; min-width: 0; }

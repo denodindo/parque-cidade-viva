@@ -14,6 +14,15 @@ import {
   type StatusCusto,
   type TipoCusto,
 } from '../../lib/budget-calculator';
+import { AVISO_ESTIMATIVA, EquipeOperacao, EstimativaItens, Financiamento, ResumoEstimativa } from './Estimativa';
+
+type Vista = 'rastreavel' | 'itens' | 'equipe' | 'financiamento';
+const VISTAS: { id: Vista; rotulo: string }[] = [
+  { id: 'rastreavel', rotulo: 'Orçamento rastreável' },
+  { id: 'itens', rotulo: 'Estimativa por item' },
+  { id: 'equipe', rotulo: 'Equipe e operação' },
+  { id: 'financiamento', rotulo: 'Financiamento' },
+];
 
 const TIPOS: TipoCusto[] = ['CAPEX', 'implantacao_programas', 'OPEX_anual', 'OPEX_mensal'];
 
@@ -38,6 +47,7 @@ export function BudgetPanel() {
   const [setor, setSetor] = useState<string>('todos');
   const [status, setStatus] = useState<StatusCusto | 'todos'>('todos');
   const [busca, setBusca] = useState('');
+  const [vista, setVista] = useState<Vista>('rastreavel');
   const pais = idsComFilhos(ORCAMENTO);
 
   const filtrados = useMemo(
@@ -62,8 +72,23 @@ export function BudgetPanel() {
   return (
     <section aria-labelledby="orc-titulo" className="painel-aba">
       <h2 id="orc-titulo">Orçamento conceitual</h2>
+      <ResumoEstimativa />
+      <p className="nota" role="note">{AVISO_ESTIMATIVA}</p>
+      <div className="subvistas" role="group" aria-label="Visão do orçamento">
+        {VISTAS.map((v) => (
+          <button key={v.id} type="button" className="botao" aria-pressed={vista === v.id} onClick={() => setVista(v.id)}>
+            {v.rotulo}
+          </button>
+        ))}
+      </div>
+
+      {vista === 'itens' && <EstimativaItens />}
+      {vista === 'equipe' && <EquipeOperacao />}
+      {vista === 'financiamento' && <Financiamento />}
+      {vista === 'rastreavel' && (
+      <>
       <p className="aviso" role="note">
-        ⚠ Não há total do parque: nenhum lançamento tem quantitativo, preço, fonte e data-base. Valores ausentes aparecem como “A cotar/A calcular”,
+        ⚠ Orçamento rastreável sem total: nenhum lançamento tem quantitativo, preço, fonte e data-base. Valores ausentes aparecem como “A cotar/A calcular”,
         nunca como R$ 0. CAPEX e OPEX não se somam.
       </p>
 
@@ -164,8 +189,10 @@ export function BudgetPanel() {
       </button>
       <p className="nota">
         Fontes previstas: SINAPI-SP (com competência e composição), tabelas públicas aplicáveis ou cotação documentada. BDI, encargos e contingência
-        dependem do regime e da memória de cálculo. Não há cenário de preços ilustrativos: nenhum preço foi inventado.
+        dependem do regime e da memória de cálculo. As faixas da estimativa não entram aqui: só valores com fonte e data-base.
       </p>
+      </>
+      )}
     </section>
   );
 }

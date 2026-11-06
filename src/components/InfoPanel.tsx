@@ -11,6 +11,7 @@ import { FASE_POR_OBJETO, fasePorId } from '../data/phases';
 import { lancamentosDoObjeto } from '../lib/budget-calculator';
 import { polygonArea } from '../lib/geometry';
 import { CostSummary } from './CostSummary';
+import { EstimativaObjeto } from '../features/budget/Estimativa';
 
 const NOME_DOC: Record<Fonte['documento'], string> = {
   estudo_v1: 'Estudo conceitual v1.0',
@@ -118,6 +119,7 @@ function FichaEdificio({ id }: { id: string }) {
       {e.avisos.map((a) => <p key={a} className="aviso" role="note">⚠ {a}</p>)}
       <ControlesPavimentos id={e.id} />
       <CostSummary itens={lancamentosDoObjeto(ORCAMENTO, e.objeto_3d_id)} />
+      <EstimativaObjeto id={e.objeto_3d_id} />
       <Pendencias itens={e.pendencias} />
       <p className="nota">Volume 3D ilustrativo: a forma e o tamanho na cena não são dimensões de projeto.</p>
       <Fontes fontes={e.fontes} />
@@ -148,6 +150,7 @@ function FichaSetor({ id }: { id: string }) {
         </p>
       ) : null}
       <p>Custo: <strong>A calcular</strong></p>
+      <EstimativaObjeto id={id} />
       <Fontes fontes={s.fontes} />
     </>
   );
@@ -172,6 +175,7 @@ function FichaInstalacao({ id }: { id: string }) {
         <p className="aviso" role="note">⚠ Pontos estratégicos de coleta seletiva. A ideia de uma lixeira a cada 2 m foi descartada (estudo v1 §6.4).</p>
       ) : null}
       <CostSummary itens={lanc} agrupado />
+      <EstimativaObjeto id={i.id} />
       <Pendencias itens={i.pendencias} />
       <Fontes fontes={i.fontes} />
     </>
@@ -189,6 +193,7 @@ function FichaTerreno() {
       </dl>
       <p className="aviso" role="note">⚠ Contorno lido visualmente da imagem de referência. Não é levantamento topográfico, cadastral nem georreferenciado; norte e escala reais não comprovados.</p>
       <p className="aviso" role="note">⚠ {TRILHA_HIPOTETICA.aviso}</p>
+      <EstimativaObjeto id="terreno" />
     </>
   );
 }

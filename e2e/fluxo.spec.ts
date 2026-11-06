@@ -70,12 +70,13 @@ test.describe('fluxo principal da maquete', () => {
 import AxeBuilder from '@axe-core/playwright';
 
 test.describe('acessibilidade automática (axe)', () => {
-  for (const aba of ['Explorar', 'Orçamento', 'Programas', 'Apresentar']) {
-    test(`sem violações sérias na aba ${aba}`, async ({ page }) => {
+  for (const [aba, vista] of [['Explorar'], ['Orçamento'], ['Orçamento', 'Estimativa por item'], ['Orçamento', 'Equipe e operação'], ['Orçamento', 'Financiamento'], ['Programas'], ['Apresentar']] as [string, string?][]) {
+    test(`sem violações sérias na aba ${aba}${vista ? ` (${vista})` : ''}`, async ({ page }) => {
       await page.goto('/');
       await expect(page.locator('canvas')).toBeVisible({ timeout: 20_000 });
       await page.getByRole('tab', { name: aba }).click();
       if (aba === 'Explorar') await page.getByRole('button', { name: 'Ginásio multifuncional', exact: true }).click();
+      if (vista) await page.getByRole('button', { name: vista, exact: true }).click();
       const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).exclude('canvas').analyze();
       const graves = r.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
       expect(graves.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).slice(0, 3).join(' | ')}`)).toEqual([]);

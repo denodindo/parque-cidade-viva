@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0 — estimativas e financiamento
+
+- Estimativa de ordem de grandeza (nov/2026) no app e no site: resumo na aba Orçamento (implantação, operação por ano, equipe), visões por item, equipe e operação e financiamento, faixa nas fichas e no percurso de apresentação.
+- Orçamento rastreável inalterado: preços continuam "A calcular" até haver fonte e data-base.
+- Anexo em Word com memória de cálculo e fontes (`docs/Parque_Cidade_Viva_Estimativas_e_Financiamento.docx`).
+
 ## 1.0.0 — empacotamento
 
 - App desktop com Electron: executável portátil e `.zip` para Windows, AppImage para Linux (`npm run dist:desktop`).
