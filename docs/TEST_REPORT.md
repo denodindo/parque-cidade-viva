@@ -1,5 +1,20 @@
 # Relatório de testes
 
+## Anexo de estimativas e financiamento — 06/11/2026
+
+Pedido do responsável: faixas de valor por item, equipe e salários, e quem pode financiar. Não altera o aplicativo (orçamento continua "A calcular"; ver DT-35).
+
+| Comando | Resultado |
+|---|---|
+| `node docs/estimativas/calc.cjs` | Implantação R$ 79 mi a R$ 184 mi; operação R$ 7,9 mi a R$ 21 mi por ano; equipe de 79 a 127 pessoas |
+| `node docs/estimativas/gerar.cjs <saída.docx>` (com o pacote `docx` disponível no ambiente) | Gerou `docs/Parque_Cidade_Viva_Estimativas_e_Financiamento.docx` |
+| `validate.py` (XSD do Office) | "All validations PASSED" |
+| Conversão para PDF (LibreOffice) e inspeção das 14 páginas | Tabelas, notas e fontes legíveis; sem páginas em branco |
+
+Slides da apresentação: slide "Investimento" refeito com as faixas e novo slide "Financiamento" publicados no artifact. **Não inspecionados visualmente** nesta etapa.
+
+Pendências: trocar as hipóteses por composições SINAPI-SP e cotações; conferir os limites das leis de incentivo e os valores de programas na data de cada edital.
+
 ## D3 a D8 — 06/11/2026 (entrega final)
 
 Ambiente: Node v22.23.4, npm 10.9.9, Chromium do Playwright 1.63.0 (WebGL por SwiftShader).

@@ -66,6 +66,7 @@ Regra: em divergência entre documentos, registrar aqui, mostrar a origem e adot
 | DT-32 | E2E com `@playwright/test` 1.63.0 (mesma versão do Chromium pré-instalado) e axe-core | Fluxo pedido no PM §12 e verificação de acessibilidade |
 | DT-33 | Aba "Apresentar" (em vez de "Apresentação") | Nome cabia cortado na barra lateral |
 | DT-34 | Câmera humana, vegetação animada, água animada e pessoas estilizadas **não** implementadas | Opcionais no PM §7.1/§7.10; priorizado o que comunica o conceito com segurança |
+| DT-35 | **Estimativa paramétrica de ordem de grandeza** em documento separado (`docs/Parque_Cidade_Viva_Estimativas_e_Financiamento.docx`, memória de cálculo em `docs/estimativas/`), a pedido do responsável em 06/11/2026: faixas de custo por item, equipe e salários, OPEX e mapa de financiadores | O responsável pediu valores. Cada linha indica se vem de referência pública citada (CUB-SP set/2026, Novo PAC, licitações e CAGED 2026) ou de hipótese do estudo. **O orçamento do aplicativo continua `null` / "A calcular"**: as faixas não são preço SINAPI, cotação nem orçamento oficial, e não entram no app até haver quantidades medidas e fontes com data (mantém DT-23) |
 
 ## Pendências (externas ao software)
 
